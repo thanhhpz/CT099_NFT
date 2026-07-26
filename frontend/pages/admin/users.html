@@ -1,62 +1,64 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý người dùng</title>
-    <link rel="stylesheet" href="../../css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="../../css/style.css" />
+  </head>
+  <body>
     <header class="topbar">
-        <div class="topbar-brand">NFT <span>RENTAL</span></div>
-        <div class="topbar-nav" id="topbarNav">
-            <a href="dashboard.html">Tổng quan</a>
-            <a href="users.html" class="active">Người dùng</a>
-            <a href="games.html">Trò chơi</a>
-            <a href="characters.html">Nhân vật</a>
-            <a href="items.html">Vật phẩm</a>
-            <a href="nfts.html">NFT</a>
-            <a href="rentals.html">Hợp đồng</a>
-            <a href="transactions.html">Giao dịch</a>
-            <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+      <div class="topbar-brand">NFT <span>RENTAL</span></div>
+      <div class="topbar-nav" id="topbarNav">
+        <a href="dashboard.html">Tổng quan</a>
+        <a href="users.html" class="active">Người dùng</a>
+        <a href="games.html">Trò chơi</a>
+        <a href="characters.html">Nhân vật</a>
+        <a href="items.html">Vật phẩm</a>
+        <a href="nfts.html">NFT</a>
+        <a href="rentals.html">Hợp đồng</a>
+        <a href="transactions.html">Giao dịch</a>
+        <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+      </div>
+      <div class="topbar-right">
+        <div class="balance-box">
+          <span class="amount" id="walletBalance">0</span> COINS
         </div>
-        <div class="topbar-right">
-            <div class="balance-box">
-                <span class="amount" id="walletBalance">0</span> COINS
-            </div>
-            <button class="topbar-toggle" onclick="toggleNav()">☰</button>
-        </div>
+        <button class="topbar-toggle" onclick="toggleNav()">☰</button>
+      </div>
     </header>
 
     <div class="container">
-        <main>
-            <h2 style="font-size:18px;font-weight:600;margin-bottom:14px;">Quản lý người dùng</h2>
+      <main>
+        <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 14px">
+          Quản lý người dùng
+        </h2>
 
-            <div id="userList"></div>
-        </main>
+        <div id="userList"></div>
+      </main>
     </div>
 
     <script>
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user'));
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
 
-        if (!token || !user || user.vai_tro !== 'quan_tri') {
-            window.location.href = '../login.html';
-        }
+      if (!token || !user || user.vai_tro !== "quan_tri") {
+        window.location.href = "../login.html";
+      }
 
-        function toggleNav() {
-            document.getElementById('topbarNav').classList.toggle('open');
-        }
+      function toggleNav() {
+        document.getElementById("topbarNav").classList.toggle("open");
+      }
 
-        async function loadUsers() {
-            try {
-                const res = await fetch('http://localhost:5000/api/admin/users', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
+      async function loadUsers() {
+        try {
+          const res = await fetch("http://localhost:5000/api/admin/users", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
 
-                if (data.success) {
-                    let html = `
+          if (data.success) {
+            let html = `
                         <div class="table-wrap">
                             <table>
                                 <thead>
@@ -67,73 +69,71 @@
                                         <th>Email</th>
                                         <th>Vai trò</th>
                                         <th>Địa chỉ ví</th>
-                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                     `;
 
-                    data.users.forEach((u, index) => {
-                        const roleText = u.vai_tro === 'quan_tri' ? 'Quản trị' : 'Người dùng';
-                        const roleBadge = u.vai_tro === 'quan_tri' ? 'badge-danger' : 'badge-info';
-                        html += `
+            data.users.forEach((u, index) => {
+              const roleText =
+                u.vai_tro === "quan_tri" ? "Quản trị" : "Người dùng";
+              const roleBadge =
+                u.vai_tro === "quan_tri" ? "badge-danger" : "badge-info";
+              html += `
                             <tr>
                                 <td>${index + 1}</td>
                                 <td><strong>${u.ten_nguoi_dung}</strong></td>
                                 <td>${u.ho_ten}</td>
                                 <td>${u.email}</td>
                                 <td><span class="badge ${roleBadge}">${roleText}</span></td>
-                                <td style="font-family:monospace;font-size:12px;">${u.dia_chi_vi ? u.dia_chi_vi.slice(0, 12) + '...' : 'Chưa có'}</td>
-                                <td>
-                                    ${u.vai_tro !== 'quan_tri' ? `
-                                        <button onclick="toggleRole('${u.ma_nguoi_dung}')" class="btn btn-sm btn-outline">Đổi vai trò</button>
-                                    ` : `
-                                        <span class="badge badge-danger">Quản trị</span>
-                                    `}
-                                </td>
+                                <td style="font-family:monospace;font-size:12px;">${u.dia_chi_vi ? u.dia_chi_vi.slice(0, 12) + "..." : "Chưa có"}</td>
+                                
                             </tr>
                         `;
-                    });
+            });
 
-                    html += '</tbody></table></div>';
-                    document.getElementById('userList').innerHTML = html;
-                }
-            } catch (error) {
-                document.getElementById('userList').innerHTML = `<div class="msg msg-error">Lỗi tải danh sách người dùng</div>`;
-            }
+            html += "</tbody></table></div>";
+            document.getElementById("userList").innerHTML = html;
+          }
+        } catch (error) {
+          document.getElementById("userList").innerHTML =
+            `<div class="msg msg-error">Lỗi tải danh sách người dùng</div>`;
         }
+      }
 
-        async function toggleRole(maNguoiDung) {
-            if (!confirm('Đổi vai trò của người dùng này?')) return;
+      // async function toggleRole(maNguoiDung) {
+      //     if (!confirm('Đổi vai trò của người dùng này?')) return;
 
-            try {
-                const res = await fetch(`http://localhost:5000/api/admin/users/${maNguoiDung}/toggle-role`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert('Đổi vai trò thành công');
-                    loadUsers();
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            } catch (error) {
-                alert('Lỗi kết nối máy chủ');
-            }
-        }
+      //     try {
+      //         const res = await fetch(`http://localhost:5000/api/admin/users/${maNguoiDung}/toggle-role`, {
+      //             method: 'PUT',
+      //             headers: {
+      //                 'Content-Type': 'application/json',
+      //                 'Authorization': `Bearer ${token}`
+      //             }
+      //         });
+      //         const data = await res.json();
+      //         if (data.success) {
+      //             alert('Đổi vai trò thành công');
+      //             loadUsers();
+      //         } else {
+      //             alert('Lỗi: ' + data.message);
+      //         }
+      //     } catch (error) {
+      //         alert('Lỗi kết nối máy chủ');
+      //     }
+      // }
 
-        loadUsers();
+      loadUsers();
 
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '../login.html';
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "../login.html";
         });
     </script>
-</body>
+  </body>
 </html>

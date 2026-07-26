@@ -22,17 +22,17 @@ def item_routes(app):
                 return jsonify({'success': False, 'message': 'Nhân vật không tồn tại'}), 404
         
         item = VatPham(
-            ten_vat_pham=data['ten_vat_pham'],
-            mo_ta=data.get('mo_ta', ''),
-            gia_thue=data['gia_thue'],
-            don_vi_thue=data.get('don_vi_thue', 'ngày'),
-            thoi_gian_thue_toi_da=data.get('thoi_gian_thue_toi_da', 30),
-            tien_dat_coc=data.get('tien_dat_coc', data['gia_thue'] * 0.2),
-            do_hiem=data.get('do_hiem', 'thường'),
-            ma_game=data['ma_game'],
+            data['ten_vat_pham'],  # 1. ten_vat_pham
+            data.get('mo_ta', ''),  # 2. mo_ta
+            data['gia_thue'],  # 3. gia_thue
+            data.get('don_vi_thue', 'ngày'),  # 4. don_vi_thue
+            data.get('thoi_gian_thue_toi_da', 30),  # 5. thoi_gian_thue_toi_da
+            data.get('tien_dat_coc', data['gia_thue'] * 0.2),  # 6. tien_dat_coc
+            data.get('do_hiem', 'thường'),  # 7. do_hiem
+            data['ma_game'],  # 8. ma_game
             duoc_dung_cho=data.get('duoc_dung_cho'),
             ma_danh_muc=data.get('ma_danh_muc'),
-            loai=data.get('loai', 'vật phẩm')
+            loai=data.get('loai', 'vật phẩm'),
         )
         item.save()
         

@@ -322,10 +322,11 @@ def admin_routes(app):
                 mo_ta=data.get('mo_ta', ''),
                 loai=data.get('loai', ''),
                 gia_thue=data.get('gia_thue', 10),
+                don_vi_thue=data.get('don_vi_thue', 'ngày'),
                 tien_dat_coc=data.get('tien_dat_coc', 50),
                 thoi_gian_thue_toi_da=data.get('thoi_gian_thue_toi_da', 30),
                 do_hiem=data.get('do_hiem', 'thường'),
-                duoc_dung_cho=data.get('duoc_dung_cho', None)
+                duoc_dung_cho=data.get('duoc_dung_cho')
             )
             item.save()
             return jsonify({'success': True, 'item': item.to_dict()}), 201
