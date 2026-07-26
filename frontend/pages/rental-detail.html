@@ -1,103 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thuê NFT</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
     <header class="topbar">
-        <div class="topbar-brand">NFT <span>RENTAL</span></div>
-        <div class="topbar-nav" id="topbarNav">
-            <a href="dashboard.html">Tổng quan</a>
-            <a href="games.html">Trò chơi</a>
-            <a href="marketplace.html">Chợ NFT</a>
-            <a href="my-nfts.html">NFT của tôi</a>
-            <a href="rentals.html">Thuê</a>
-            <a href="wallet.html">Ví</a>
-            <a href="transactions.html">Giao dịch</a>
-            <a href="notifications.html">Thông báo</a>
-            <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+      <div class="topbar-brand">NFT <span>RENTAL</span></div>
+      <div class="topbar-nav" id="topbarNav">
+        <a href="dashboard.html">Tổng quan</a>
+        <a href="games.html">Trò chơi</a>
+        <a href="marketplace.html">Chợ NFT</a>
+        <a href="my-nfts.html">NFT của tôi</a>
+        <a href="rentals.html">Thuê</a>
+        <a href="wallet.html">Ví</a>
+        <a href="transactions.html">Giao dịch</a>
+        <a href="notifications.html">Thông báo</a>
+        <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+      </div>
+      <div class="topbar-right">
+        <div class="balance-box">
+          <span class="amount" id="walletBalance">0</span> COINS
         </div>
-        <div class="topbar-right">
-            <div class="balance-box">
-                <span class="amount" id="walletBalance">0</span> COINS
-            </div>
-            <button class="topbar-toggle" onclick="toggleNav()">☰</button>
-        </div>
+        <button class="topbar-toggle" onclick="toggleNav()">☰</button>
+      </div>
     </header>
 
     <div class="container">
-        <main style="max-width:600px;margin:0 auto;">
-            <h2 style="font-size:18px;font-weight:600;margin-bottom:14px;">Thuê NFT</h2>
+      <main style="max-width: 600px; margin: 0 auto">
+        <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 14px">
+          Thuê NFT
+        </h2>
 
-            <div id="nftInfo"></div>
-            <div id="rentalForm"></div>
-            <div id="suggestedCharacters"></div>
-        </main>
+        <div id="nftInfo"></div>
+        <div id="rentalForm"></div>
+        <div id="suggestedCharacters"></div>
+      </main>
     </div>
 
     <script>
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user'));
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
 
-        if (!token || !user) window.location.href = 'login.html';
+      if (!token || !user) window.location.href = "login.html";
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const nftId = urlParams.get('nft_id');
+      const urlParams = new URLSearchParams(window.location.search);
+      const nftId = urlParams.get("nft_id");
 
-        if (!nftId) window.location.href = 'marketplace.html';
+      if (!nftId) window.location.href = "marketplace.html";
 
-        let nftData = null;
+      let nftData = null;
 
-        function toggleNav() {
-            document.getElementById('topbarNav').classList.toggle('open');
-        }
+      function toggleNav() {
+        document.getElementById("topbarNav").classList.toggle("open");
+      }
 
-        async function loadWalletBalance() {
+      async function loadWalletBalance() {
+        try {
+          const res = await fetch(
+            `http://localhost:5000/api/wallet/${user.ten_nguoi_dung}`,
+          );
+          const data = await res.json();
+          if (data.success) {
+            document.getElementById("walletBalance").textContent =
+              data.wallet.so_du || 0;
+          }
+        } catch (e) {}
+      }
+
+      async function loadNFTInfo() {
+        try {
+          const res = await fetch(`http://localhost:5000/api/nfts/${nftId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            nftData = data.nft;
+
+            let ownerName = nftData.dia_chi_chu_so_huu.slice(0, 12) + "...";
             try {
-                const res = await fetch(`http://localhost:5000/api/wallet/${user.ten_nguoi_dung}`);
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('walletBalance').textContent = data.wallet.so_du || 0;
-                }
+              const ownerRes = await fetch(
+                `http://localhost:5000/api/wallet/${nftData.dia_chi_chu_so_huu}`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                },
+              );
+              const ownerData = await ownerRes.json();
+              if (ownerData.success && ownerData.wallet) {
+                ownerName = ownerData.wallet.ten_nguoi_dung || "Không rõ";
+              }
             } catch (e) {}
-        }
 
-        async function loadNFTInfo() {
-            try {
-                const res = await fetch(`http://localhost:5000/api/nfts/${nftId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    nftData = data.nft;
-
-                    let ownerName = nftData.dia_chi_chu_so_huu.slice(0, 12) + '...';
-                    try {
-                        const ownerRes = await fetch(`http://localhost:5000/api/wallet/${nftData.dia_chi_chu_so_huu}`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        const ownerData = await ownerRes.json();
-                        if (ownerData.success && ownerData.wallet) {
-                            ownerName = ownerData.wallet.ten_nguoi_dung || 'Không rõ';
-                        }
-                    } catch (e) {}
-
-                    document.getElementById('nftInfo').innerHTML = `
+            document.getElementById("nftInfo").innerHTML = `
                         <div class="card">
                             <div class="card-header">${nftData.ten}</div>
-                            <p style="color:var(--text-secondary);font-size:13px;">${nftData.mo_ta || 'Không có mô tả'}</p>
+                            <p style="color:var(--text-secondary);font-size:13px;">${nftData.mo_ta || "Không có mô tả"}</p>
                             <p><strong>Giá thuê:</strong> <span class="text-gold">${nftData.gia_thue}</span> COINS/ngày</p>
                             <p><strong>Chủ sở hữu:</strong> ${ownerName}</p>
                             <p><strong>Trạng thái:</strong> <span class="badge badge-success">Có sẵn</span></p>
                         </div>
                     `;
 
-                    // Hiển thị form thuê
-                    document.getElementById('rentalForm').innerHTML = `
+            // Hiển thị form thuê
+            document.getElementById("rentalForm").innerHTML = `
                         <div class="card">
                             <div class="card-header">Thông tin thuê</div>
                             <form id="rentalFormSubmit">
@@ -107,7 +115,7 @@
                                     <label>Đơn vị thuê</label>
                                     <select id="rentUnit" onchange="toggleRentUnit()">
                                         <option value="ngay">Ngày</option>
-                                        <option value="gio">Giờ</option>
+                                        
                                         <option value="tuan">Tuần</option>
                                     </select>
                                 </div>
@@ -148,227 +156,257 @@
                         </div>
                     `;
 
-                    // Tải danh sách nhân vật
-                    loadSuggestedCharacters();
+            // Tải danh sách nhân vật
+            loadSuggestedCharacters();
 
-                    // Cập nhật giá khi thay đổi
-                    document.getElementById('rentDays').addEventListener('input', updatePrice);
-                    document.getElementById('rentHours').addEventListener('input', updatePrice);
-                    document.getElementById('rentUnit').addEventListener('change', updatePrice);
+            // Cập nhật giá khi thay đổi
+            document
+              .getElementById("rentDays")
+              .addEventListener("input", updatePrice);
+            document
+              .getElementById("rentHours")
+              .addEventListener("input", updatePrice);
+            document
+              .getElementById("rentUnit")
+              .addEventListener("change", updatePrice);
+          } else {
+            document.getElementById("nftInfo").innerHTML =
+              `<div class="msg msg-error">Không tìm thấy NFT</div>`;
+          }
+        } catch (error) {
+          document.getElementById("nftInfo").innerHTML =
+            `<div class="msg msg-error">Lỗi tải thông tin NFT</div>`;
+        }
+      }
 
-                } else {
-                    document.getElementById('nftInfo').innerHTML = `<div class="msg msg-error">Không tìm thấy NFT</div>`;
-                }
-            } catch (error) {
-                document.getElementById('nftInfo').innerHTML = `<div class="msg msg-error">Lỗi tải thông tin NFT</div>`;
+      // ============================================================
+      // ĐỀ XUẤT NHÂN VẬT
+      // ============================================================
+
+      async function loadSuggestedCharacters() {
+        try {
+          const itemRes = await fetch(
+            `http://localhost:5000/api/items/${nftData.ma_vat_pham}`,
+          );
+          const itemData = await itemRes.json();
+          if (!itemData.success) return;
+
+          const item = itemData.item;
+          const select = document.getElementById("rentCharacter");
+          const suggestionDiv = document.getElementById("characterSuggestion");
+
+          // Gọi API đề xuất nhân vật
+          const suggestRes = await fetch(
+            `http://localhost:5000/api/rentals/suggest-characters/${nftData.ma_vat_pham}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+          const suggestData = await suggestRes.json();
+
+          if (suggestData.success && suggestData.suggested.length > 0) {
+            suggestionDiv.innerHTML = `Đề xuất: ${suggestData.suggested.map((c) => c.ten_nhan_vat).join(", ")}`;
+            for (const char of suggestData.suggested) {
+              select.innerHTML += `<option value="${char.ma_nhan_vat}">${char.ten_nhan_vat} (Phù hợp)</option>`;
             }
+          } else {
+            // Lấy tất cả nhân vật từ game
+            const gamesRes = await fetch("http://localhost:5000/api/games");
+            const gamesData = await gamesRes.json();
+            if (gamesData.success) {
+              for (const game of gamesData.games) {
+                const charsRes = await fetch(
+                  `http://localhost:5000/api/games/${game.ma_game}/characters`,
+                );
+                const charsData = await charsRes.json();
+                if (charsData.success) {
+                  for (const char of charsData.characters) {
+                    select.innerHTML += `<option value="${char.ma_nhan_vat}">${char.ten_nhan_vat} (${game.ten_game})</option>`;
+                  }
+                }
+              }
+            }
+          }
+
+          updatePrice();
+        } catch (error) {
+          console.error("Lỗi tải nhân vật:", error);
+        }
+      }
+
+      // ============================================================
+      // TÍNH TIỀN
+      // ============================================================
+
+      function toggleRentUnit() {
+        const unit = document.getElementById("rentUnit").value;
+        document.getElementById("daysGroup").style.display =
+          unit === "ngay" || unit === "tuan" ? "block" : "none";
+        document.getElementById("hoursGroup").style.display =
+          unit === "gio" ? "block" : "none";
+        updatePrice();
+      }
+
+      function updatePrice() {
+        const unit = document.getElementById("rentUnit").value;
+        let days = 0;
+        let hours = 0;
+
+        if (unit === "ngay") {
+          days = parseInt(document.getElementById("rentDays").value) || 0;
+          hours = days * 24;
+        } else if (unit === "gio") {
+          hours = parseInt(document.getElementById("rentHours").value) || 0;
+          days = hours / 24;
+        } else if (unit === "tuan") {
+          days = (parseInt(document.getElementById("rentDays").value) || 0) * 7;
+          hours = days * 24;
         }
 
-        // ============================================================
-        // ĐỀ XUẤT NHÂN VẬT
-        // ============================================================
+        const pricePerDay = nftData?.gia_thue || 0;
+        const total = days * pricePerDay;
+        const deposit = total * 0.2;
 
-        async function loadSuggestedCharacters() {
-            try {
-                const itemRes = await fetch(`http://localhost:5000/api/items/${nftData.ma_vat_pham}`);
-                const itemData = await itemRes.json();
-                if (!itemData.success) return;
+        document.getElementById("summaryUnit").textContent = unit;
+        document.getElementById("totalPrice").textContent = Math.round(total);
+        document.getElementById("depositAmount").textContent =
+          Math.round(deposit);
+        document.getElementById("totalPayment").textContent = Math.round(
+          total + deposit,
+        );
+      }
 
-                const item = itemData.item;
-                const select = document.getElementById('rentCharacter');
-                const suggestionDiv = document.getElementById('characterSuggestion');
+      // ============================================================
+      // XÁC NHẬN THUÊ
+      // ============================================================
 
-                // Gọi API đề xuất nhân vật
-                const suggestRes = await fetch(`http://localhost:5000/api/rentals/suggest-characters/${nftData.ma_vat_pham}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const suggestData = await suggestRes.json();
+      document
+        .getElementById("rentalForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-                if (suggestData.success && suggestData.suggested.length > 0) {
-                    suggestionDiv.innerHTML = `Đề xuất: ${suggestData.suggested.map(c => c.ten_nhan_vat).join(', ')}`;
-                    for (const char of suggestData.suggested) {
-                        select.innerHTML += `<option value="${char.ma_nhan_vat}">${char.ten_nhan_vat} (Phù hợp)</option>`;
-                    }
-                } else {
-                    // Lấy tất cả nhân vật từ game
-                    const gamesRes = await fetch('http://localhost:5000/api/games');
-                    const gamesData = await gamesRes.json();
-                    if (gamesData.success) {
-                        for (const game of gamesData.games) {
-                            const charsRes = await fetch(`http://localhost:5000/api/games/${game.ma_game}/characters`);
-                            const charsData = await charsRes.json();
-                            if (charsData.success) {
-                                for (const char of charsData.characters) {
-                                    select.innerHTML += `<option value="${char.ma_nhan_vat}">${char.ten_nhan_vat} (${game.ten_game})</option>`;
-                                }
-                            }
-                        }
-                    }
-                }
+          // Lấy thông tin
+          const unit = document.getElementById("rentUnit").value;
+          let so_ngay_thue = 0;
+          let so_gio = 0;
 
-                updatePrice();
-
-            } catch (error) {
-                console.error('Lỗi tải nhân vật:', error);
+          if (unit === "ngay") {
+            so_ngay_thue =
+              parseInt(document.getElementById("rentDays").value) || 0;
+            if (so_ngay_thue <= 0) {
+              alert("Vui lòng chọn số ngày hợp lệ");
+              return;
             }
-        }
-
-        // ============================================================
-        // TÍNH TIỀN
-        // ============================================================
-
-        function toggleRentUnit() {
-            const unit = document.getElementById('rentUnit').value;
-            document.getElementById('daysGroup').style.display = (unit === 'ngay' || unit === 'tuan') ? 'block' : 'none';
-            document.getElementById('hoursGroup').style.display = unit === 'gio' ? 'block' : 'none';
-            updatePrice();
-        }
-
-        function updatePrice() {
-            const unit = document.getElementById('rentUnit').value;
-            let days = 0;
-            let hours = 0;
-
-            if (unit === 'ngay') {
-                days = parseInt(document.getElementById('rentDays').value) || 0;
-                hours = days * 24;
-            } else if (unit === 'gio') {
-                hours = parseInt(document.getElementById('rentHours').value) || 0;
-                days = hours / 24;
-            } else if (unit === 'tuan') {
-                days = (parseInt(document.getElementById('rentDays').value) || 0) * 7;
-                hours = days * 24;
+            if (so_ngay_thue > 30) {
+              alert("Số ngày thuê tối đa là 30 ngày");
+              return;
             }
+          } else if (unit === "gio") {
+            so_gio = parseInt(document.getElementById("rentHours").value) || 0;
+            if (so_gio <= 0) {
+              alert("Vui lòng chọn số giờ hợp lệ");
+              return;
+            }
+            if (so_gio > 24) {
+              alert("Số giờ thuê tối đa là 24 giờ");
+              return;
+            }
+            so_ngay_thue = so_gio / 24;
+          } else if (unit === "tuan") {
+            so_ngay_thue =
+              (parseInt(document.getElementById("rentDays").value) || 0) * 7;
+            if (so_ngay_thue <= 0) {
+              alert("Vui lòng chọn số tuần hợp lệ");
+              return;
+            }
+            if (so_ngay_thue > 30) {
+              alert("Tổng số ngày thuê tối đa là 30 ngày");
+              return;
+            }
+          }
 
-            const pricePerDay = nftData?.gia_thue || 0;
-            const total = days * pricePerDay;
-            const deposit = total * 0.2;
+          const characterId = document.getElementById("rentCharacter").value;
+          if (!characterId) {
+            alert("Vui lòng chọn nhân vật sử dụng");
+            return;
+          }
 
-            document.getElementById('summaryUnit').textContent = unit;
-            document.getElementById('totalPrice').textContent = Math.round(total);
-            document.getElementById('depositAmount').textContent = Math.round(deposit);
-            document.getElementById('totalPayment').textContent = Math.round(total + deposit);
-        }
+          // Kiểm tra tương thích
+          try {
+            const compatRes = await fetch(
+              `http://localhost:5000/api/characters/${characterId}/compatibility/${nftData.ma_vat_pham}`,
+            );
+            const compatData = await compatRes.json();
+            if (compatData.success && !compatData.compatible) {
+              alert("Nhân vật này không thể sử dụng vật phẩm này");
+              return;
+            }
+          } catch (e) {}
 
-        // ============================================================
-        // XÁC NHẬN THUÊ
-        // ============================================================
+          // Xác nhận
+          const confirmMsg =
+            unit === "gio"
+              ? `Xác nhận thuê NFT "${nftData.ten}" trong ${so_gio} giờ?`
+              : `Xác nhận thuê NFT "${nftData.ten}" trong ${so_ngay_thue} ngày?`;
 
-        document.getElementById('rentalForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+          if (!confirm(confirmMsg)) return;
 
-            // Lấy thông tin
-            const unit = document.getElementById('rentUnit').value;
-            let so_ngay_thue = 0;
-            let so_gio = 0;
+          // Gửi request
+          try {
+            const body = {
+              ma_bai_dang: nftData.ma_vat_pham,
+              ma_nguoi_thue: user.ma_nguoi_dung,
+              ma_nhan_vat: characterId,
+            };
 
-            if (unit === 'ngay') {
-                so_ngay_thue = parseInt(document.getElementById('rentDays').value) || 0;
-                if (so_ngay_thue <= 0) {
-                    alert('Vui lòng chọn số ngày hợp lệ');
-                    return;
-                }
-                if (so_ngay_thue > 30) {
-                    alert('Số ngày thuê tối đa là 30 ngày');
-                    return;
-                }
-            } else if (unit === 'gio') {
-                so_gio = parseInt(document.getElementById('rentHours').value) || 0;
-                if (so_gio <= 0) {
-                    alert('Vui lòng chọn số giờ hợp lệ');
-                    return;
-                }
-                if (so_gio > 24) {
-                    alert('Số giờ thuê tối đa là 24 giờ');
-                    return;
-                }
-                so_ngay_thue = so_gio / 24;
-            } else if (unit === 'tuan') {
-                so_ngay_thue = (parseInt(document.getElementById('rentDays').value) || 0) * 7;
-                if (so_ngay_thue <= 0) {
-                    alert('Vui lòng chọn số tuần hợp lệ');
-                    return;
-                }
-                if (so_ngay_thue > 30) {
-                    alert('Tổng số ngày thuê tối đa là 30 ngày');
-                    return;
-                }
+            if (unit === "gio") {
+              body.so_gio = so_gio;
+              body.don_vi = "gio";
+            } else {
+              body.so_ngay_thue = so_ngay_thue;
+              body.don_vi = unit;
             }
 
-            const characterId = document.getElementById('rentCharacter').value;
-            if (!characterId) {
-                alert('Vui lòng chọn nhân vật sử dụng');
-                return;
+            const res = await fetch(
+              "http://localhost:5000/api/rentals/create",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(body),
+              },
+            );
+
+            const data = await res.json();
+
+            if (data.success) {
+              alert("Thuê NFT thành công!");
+              window.location.href = "rentals.html";
+            } else {
+              alert("Lỗi: " + data.message);
             }
-
-            // Kiểm tra tương thích
-            try {
-                const compatRes = await fetch(`http://localhost:5000/api/characters/${characterId}/compatibility/${nftData.ma_vat_pham}`);
-                const compatData = await compatRes.json();
-                if (compatData.success && !compatData.compatible) {
-                    alert('Nhân vật này không thể sử dụng vật phẩm này');
-                    return;
-                }
-            } catch (e) {}
-
-            // Xác nhận
-            const confirmMsg = unit === 'gio'
-                ? `Xác nhận thuê NFT "${nftData.ten}" trong ${so_gio} giờ?`
-                : `Xác nhận thuê NFT "${nftData.ten}" trong ${so_ngay_thue} ngày?`;
-
-            if (!confirm(confirmMsg)) return;
-
-            // Gửi request
-            try {
-                const body = {
-                    ma_bai_dang: nftData.ma_vat_pham,
-                    ma_nguoi_thue: user.ma_nguoi_dung,
-                    ma_nhan_vat: characterId
-                };
-
-                if (unit === 'gio') {
-                    body.so_gio = so_gio;
-                    body.don_vi = 'gio';
-                } else {
-                    body.so_ngay_thue = so_ngay_thue;
-                    body.don_vi = unit;
-                }
-
-                const res = await fetch('http://localhost:5000/api/rentals/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(body)
-                });
-
-                const data = await res.json();
-
-                if (data.success) {
-                    alert('Thuê NFT thành công!');
-                    window.location.href = 'rentals.html';
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            } catch (error) {
-                alert('Lỗi kết nối máy chủ');
-            }
+          } catch (error) {
+            alert("Lỗi kết nối máy chủ");
+          }
         });
 
-        // ============================================================
-        // KHỞI TẠO
-        // ============================================================
+      // ============================================================
+      // KHỞI TẠO
+      // ============================================================
 
-        loadWalletBalance();
-        loadNFTInfo();
+      loadWalletBalance();
+      loadNFTInfo();
 
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "login.html";
         });
     </script>
-</body>
+  </body>
 </html>

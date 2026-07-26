@@ -1,188 +1,231 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vật phẩm</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
     <header class="topbar">
-        <div class="topbar-brand">NFT <span>RENTAL</span></div>
-        <div class="topbar-nav" id="topbarNav">
-            <a href="dashboard.html">Tổng quan</a>
-            <a href="games.html">Trò chơi</a>
-            <a href="marketplace.html">Chợ NFT</a>
-            <a href="my-nfts.html">NFT của tôi</a>
-            <a href="rentals.html">Thuê</a>
-            <a href="wallet.html">Ví</a>
-            <a href="transactions.html">Giao dịch</a>
-            <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+      <div class="topbar-brand">NFT <span>RENTAL</span></div>
+      <div class="topbar-nav" id="topbarNav">
+        <a href="dashboard.html">Tổng quan</a>
+        <a href="games.html">Trò chơi</a>
+        <a href="marketplace.html">Chợ NFT</a>
+        <a href="my-nfts.html">NFT của tôi</a>
+        <a href="rentals.html">Thuê</a>
+        <a href="wallet.html">Ví</a>
+        <a href="transactions.html">Giao dịch</a>
+        <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+      </div>
+      <div class="topbar-right">
+        <div class="balance-box">
+          <span class="amount" id="walletBalance">0</span> COINS
         </div>
-        <div class="topbar-right">
-            <div class="balance-box">
-                <span class="amount" id="walletBalance">0</span> COINS
-            </div>
-            <button class="topbar-toggle" onclick="toggleNav()">☰</button>
-        </div>
+        <button class="topbar-toggle" onclick="toggleNav()">☰</button>
+      </div>
     </header>
 
     <div class="container">
-        <main>
-            <h2 style="font-size:18px;font-weight:600;margin-bottom:14px;">Vật phẩm</h2>
-            <div id="itemList"></div>
-        </main>
+      <main>
+        <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 14px">
+          Vật phẩm
+        </h2>
+        <div id="itemList"></div>
+      </main>
     </div>
 
     <script>
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user'));
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
 
-        if (!token || !user) window.location.href = 'login.html';
+      if (!token || !user) window.location.href = "login.html";
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const characterId = urlParams.get('character_id');
+      const urlParams = new URLSearchParams(window.location.search);
+      const characterId = urlParams.get("character_id");
 
-        if (!characterId) window.location.href = 'characters.html';
+      if (!characterId) window.location.href = "characters.html";
 
-        function toggleNav() {
-            document.getElementById('topbarNav').classList.toggle('open');
-        }
+      function toggleNav() {
+        document.getElementById("topbarNav").classList.toggle("open");
+      }
 
-        async function loadWalletBalance() {
-            try {
-                const res = await fetch(`http://localhost:5000/api/wallet/${user.ten_nguoi_dung}`);
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('walletBalance').textContent = data.wallet.so_du || 0;
-                }
-            } catch (e) {}
-        }
+      async function loadWalletBalance() {
+        try {
+          const res = await fetch(
+            `http://localhost:5000/api/wallet/${user.ten_nguoi_dung}`,
+          );
+          const data = await res.json();
+          if (data.success) {
+            document.getElementById("walletBalance").textContent =
+              data.wallet.so_du || 0;
+          }
+        } catch (e) {}
+      }
 
-        async function loadItems() {
-            try {
-                const res = await fetch(`http://localhost:5000/api/characters/${characterId}/items`);
-                const data = await res.json();
-                if (data.success) {
-                    let html = '<div class="card-grid">';
-                    if (data.items.length === 0) {
-                        html += `<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:30px 0;">Chưa có vật phẩm</p>`;
-                    } else {
-                        for (const item of data.items) {
-                            const statusText = item.trang_thai_thue === 'còn trống' ? 'Có sẵn' : 'Đang thuê';
-                            const statusClass = item.trang_thai_thue === 'còn trống' ? 'badge-success' : 'badge-warning';
-                            
-                            const hasNft = item.has_nft === true;
-                            const nft = item.nft || null;
-                            
-                            // ============================================================
-                            // LOGIC ĐÚNG:
-                            // ============================================================
-                            // 1. Nếu user là CHỦ SỞ HỮU → "Quản lý NFT" (không hiện "Thuê")
-                            // 2. Nếu user KHÔNG phải chủ sở hữu và NFT Có sẵn → "Thuê"
-                            // 3. Nếu chưa có NFT → "Mua NFT"
-                            // ============================================================
-                            const isOwner = hasNft && nft && user.dia_chi_vi === nft.dia_chi_chu_so_huu;
-                            const canRent = hasNft && nft && nft.trang_thai === 'co_san' && !isOwner && item.trang_thai_thue === 'còn trống';
-                            const canBuy = !hasNft && item.trang_thai_thue === 'còn trống';
-                            const buyPrice = item.gia_thue * 10;
-                            
-                            html += `
+      async function loadItems() {
+        try {
+          const res = await fetch(
+            `http://localhost:5000/api/characters/${characterId}/items`,
+          );
+          const data = await res.json();
+          if (data.success) {
+            let html = '<div class="card-grid">';
+            if (data.items.length === 0) {
+              html += `<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:30px 0;">Chưa có vật phẩm</p>`;
+            } else {
+              for (const item of data.items) {
+                const statusText =
+                  item.trang_thai_thue === "còn trống" ? "Có sẵn" : "Đang thuê";
+                const statusClass =
+                  item.trang_thai_thue === "còn trống"
+                    ? "badge-success"
+                    : "badge-warning";
+
+                const hasNft = item.has_nft === true;
+                const nft = item.nft || null;
+
+                // ============================================================
+                // LOGIC ĐÚNG:
+                // ============================================================
+                // 1. Nếu user là CHỦ SỞ HỮU → "Quản lý NFT" (không hiện "Thuê")
+                // 2. Nếu user KHÔNG phải chủ sở hữu và NFT Có sẵn → "Thuê"
+                // 3. Nếu chưa có NFT → "Mua NFT"
+                // ============================================================
+                const isOwner =
+                  hasNft && nft && user.dia_chi_vi === nft.dia_chi_chu_so_huu;
+                const canRent =
+                  hasNft &&
+                  nft &&
+                  nft.trang_thai === "co_san" &&
+                  !isOwner &&
+                  item.trang_thai_thue === "còn trống";
+                const canBuy = !hasNft && item.trang_thai_thue === "còn trống";
+                const buyPrice = item.gia_thue * 10;
+
+                html += `
                                 <div class="card">
                                     <div class="card-header">${item.ten_vat_pham}</div>
-                                    <p style="color:var(--text-secondary);font-size:13px;">${item.mo_ta || 'Không có mô tả'}</p>
-                                    <p><strong>Loại:</strong> ${item.loai || 'Không rõ'}</p>
+                                    <p style="color:var(--text-secondary);font-size:13px;">${item.mo_ta || "Không có mô tả"}</p>
+                                    <p><strong>Loại:</strong> ${item.loai || "Không rõ"}</p>
                                     <p><strong>Giá thuê:</strong> <span class="text-gold">${item.gia_thue}</span> COINS/ngày</p>
-                                    <p><strong>Tiền cọc:</strong> ${item.tien_dat_coc || 'Chưa có'} COINS</p>
+                                    <p><strong>Tiền cọc:</strong> ${item.tien_dat_coc || "Chưa có"} COINS</p>
                                     <p><strong>Trạng thái vật phẩm:</strong> <span class="badge ${statusClass}">${statusText}</span></p>
                                     
                                     <hr style="border-color:var(--border-color);margin:10px 0;">
                                     
-                                    <p><strong>NFT:</strong> <span class="badge ${hasNft ? 'badge-success' : 'badge'}">${hasNft ? 'Đã có' : 'Chưa có'}</span></p>
+                                    <p><strong>NFT:</strong> <span class="badge ${hasNft ? "badge-success" : "badge"}">${hasNft ? "Đã có" : "Chưa có"}</span></p>
                                     
-                                    ${hasNft && nft ? `
+                                    ${
+                                      hasNft && nft
+                                        ? `
                                         <p style="font-size:13px;color:var(--text-secondary);">
-                                            <strong>Chủ sở hữu:</strong> ${nft.ten_chu_so_huu || 'Không rõ'}
+                                            <strong>Chủ sở hữu:</strong> ${nft.ten_chu_so_huu || "Không rõ"}
                                         </p>
                                         <p style="font-size:13px;color:var(--text-secondary);">
                                             <strong>Giá thuê NFT:</strong> ${nft.gia_thue} COINS/ngày
                                         </p>
                                         <p style="font-size:13px;color:var(--text-secondary);">
                                             <strong>Trạng thái NFT:</strong> 
-                                            <span class="badge ${nft.trang_thai === 'co_san' ? 'badge-success' : nft.trang_thai === 'dang_thue' ? 'badge-warning' : 'badge-danger'}">
-                                                ${nft.trang_thai === 'co_san' ? 'Có sẵn' : nft.trang_thai === 'dang_thue' ? 'Đang thuê' : 'Tạm ngưng'}
+                                            <span class="badge ${nft.trang_thai === "co_san" ? "badge-success" : nft.trang_thai === "dang_thue" ? "badge-warning" : "badge-danger"}">
+                                                ${nft.trang_thai === "co_san" ? "Có sẵn" : nft.trang_thai === "dang_thue" ? "Đang thuê" : "Tạm ngưng"}
                                             </span>
                                         </p>
-                                    ` : `
+                                    `
+                                        : `
                                         <p style="font-size:13px;color:var(--text-muted);">Chưa số hóa thành NFT</p>
                                         <p style="font-size:13px;color:var(--text-muted);">
                                             <strong>Giá mua NFT:</strong> ${buyPrice} COINS
                                             <span style="font-size:11px;color:var(--text-muted);">(Giá thuê × 10 ngày)</span>
                                         </p>
-                                    `}
+                                    `
+                                    }
                                     
                                     <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
-                                        ${canRent ? `
+                                        ${
+                                          canRent
+                                            ? `
                                             <a href="rental-detail.html?nft_id=${nft.ma_nft}" class="btn btn-primary btn-sm">Thuê</a>
-                                        ` : ''}
+                                        `
+                                            : ""
+                                        }
                                         
-                                        ${isOwner ? `
+                                        ${
+                                          isOwner
+                                            ? `
                                             <a href="my-nfts.html" class="btn btn-outline btn-sm">Quản lý NFT</a>
-                                        ` : ''}
+                                        `
+                                            : ""
+                                        }
                                         
-                                        ${canBuy ? `
+                                        ${
+                                          canBuy
+                                            ? `
                                             <button onclick="buyNFT('${item.ma_vat_pham}', ${buyPrice})" class="btn btn-success btn-sm">Mua NFT (${buyPrice} COINS)</button>
-                                        ` : ''}
+                                        `
+                                            : ""
+                                        }
                                         
-                                        ${hasNft && nft && nft.trang_thai === 'dang_thue' && !isOwner ? `
+                                        ${
+                                          hasNft &&
+                                          nft &&
+                                          nft.trang_thai === "dang_thue" &&
+                                          !isOwner
+                                            ? `
                                             <span class="badge badge-warning">Đang được thuê</span>
-                                        ` : ''}
+                                        `
+                                            : ""
+                                        }
                                     </div>
                                 </div>
                             `;
-                        }
-                    }
-                    html += '</div>';
-                    document.getElementById('itemList').innerHTML = html;
-                }
-            } catch (error) {
-                document.getElementById('itemList').innerHTML = `<div class="msg msg-error">Lỗi tải danh sách vật phẩm</div>`;
+              }
             }
+            html += "</div>";
+            document.getElementById("itemList").innerHTML = html;
+          }
+        } catch (error) {
+          document.getElementById("itemList").innerHTML =
+            `<div class="msg msg-error">Lỗi tải danh sách vật phẩm</div>`;
         }
+      }
 
-        async function buyNFT(maVatPham, giaMua) {
-            if (!confirm(`Xác nhận mua NFT với giá ${giaMua} COINS?`)) return;
+      async function buyNFT(maVatPham, giaMua) {
+        if (!confirm(`Xác nhận mua NFT với giá ${giaMua} COINS?`)) return;
 
-            try {
-                const res = await fetch('http://localhost:5000/api/nfts/purchase', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ ma_vat_pham: maVatPham })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert('Mua NFT thành công!');
-                    loadItems();
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            } catch (error) {
-                alert('Lỗi kết nối máy chủ');
-            }
+        try {
+          const res = await fetch("http://localhost:5000/api/nfts/purchase", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ ma_vat_pham: maVatPham }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert("Mua NFT thành công!");
+            loadItems();
+          } else {
+            alert("Lỗi: " + data.message);
+          }
+        } catch (error) {
+          alert("Lỗi kết nối máy chủ");
         }
+      }
 
-        loadWalletBalance();
-        loadItems();
+      loadWalletBalance();
+      loadItems();
 
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "login.html";
         });
     </script>
-</body>
+  </body>
 </html>

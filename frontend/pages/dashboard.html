@@ -1,206 +1,308 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tổng quan</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
     <header class="topbar">
-        <div class="topbar-brand">NFT <span>RENTAL</span></div>
-        <div class="topbar-nav" id="topbarNav">
-            <a href="dashboard.html" class="active">Tổng quan</a>
-            <a href="games.html">Trò chơi</a>
-            <a href="marketplace.html">Chợ NFT</a>
-            <a href="my-nfts.html">NFT của tôi</a>
-            <a href="rentals.html">Thuê</a>
-            <a href="wallet.html">Ví</a>
-            <a href="transactions.html">Giao dịch</a>
-            <a href="notifications.html">Thông báo</a>
-            <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+      <div class="topbar-brand">NFT <span>RENTAL</span></div>
+      <div class="topbar-nav" id="topbarNav">
+        <a href="dashboard.html" class="active">Tổng quan</a>
+        <a href="games.html">Trò chơi</a>
+        <a href="marketplace.html">Chợ NFT</a>
+        <a href="my-nfts.html">NFT của tôi</a>
+        <a href="rentals.html">Thuê</a>
+        <a href="wallet.html">Ví</a>
+        <a href="transactions.html">Giao dịch</a>
+        <a href="notifications.html">Thông báo</a>
+        <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+      </div>
+      <div class="topbar-right">
+        <div class="balance-box">
+          <span class="amount" id="walletBalance">0</span> COINS
         </div>
-        <div class="topbar-right">
-            <div class="balance-box">
-                <span class="amount" id="walletBalance">0</span> COINS
-            </div>
-            <button class="topbar-toggle" onclick="toggleNav()">☰</button>
-        </div>
+        <button class="topbar-toggle" onclick="toggleNav()">☰</button>
+      </div>
     </header>
 
     <div class="container">
-        <main>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-                <h2 style="font-size:18px;font-weight:600;">Tổng quan</h2>
-                <span id="notificationBadge" style="display:none;background:var(--danger);color:#fff;padding:2px 10px;font-size:12px;"></span>
-            </div>
+      <main>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+          "
+        >
+          <h2 style="font-size: 18px; font-weight: 600">Tổng quan</h2>
+          <span
+            id="notificationBadge"
+            style="
+              display: none;
+              background: var(--danger);
+              color: #fff;
+              padding: 2px 10px;
+              font-size: 12px;
+            "
+          ></span>
+        </div>
 
-            <!-- Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="number" id="statBalance">0</div>
-                    <div class="label">Số dư</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="statNFTs">0</div>
-                    <div class="label">NFT sở hữu</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="statRentals">0</div>
-                    <div class="label">Đang thuê</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="statTransactions">0</div>
-                    <div class="label">Giao dịch</div>
-                </div>
-            </div>
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="number" id="statBalance">0</div>
+            <div class="label">Số dư</div>
+          </div>
+          <div class="stat-card">
+            <div class="number" id="statNFTs">0</div>
+            <div class="label">NFT sở hữu</div>
+          </div>
+          <div class="stat-card">
+            <div class="number" id="statRentals">0</div>
+            <div class="label">Đang thuê</div>
+          </div>
+          <div class="stat-card">
+            <div class="number" id="statTransactions">0</div>
+            <div class="label">Giao dịch</div>
+          </div>
+        </div>
 
-            <!-- Quick Actions -->
-            <div class="card">
-                <div class="card-header">
-                    Thao tác nhanh
-                    <span class="sub">Chức năng chính</span>
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <a href="marketplace.html" class="btn btn-primary">Chợ NFT</a>
-                    <a href="games.html" class="btn btn-outline">Trò chơi</a>
-                    <a href="wallet.html" class="btn btn-outline">Ví</a>
-                    <a href="transactions.html" class="btn btn-outline">Giao dịch</a>
-                    <a href="notifications.html" class="btn btn-outline">Thông báo</a>
-                </div>
-            </div>
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            Thao tác nhanh
+            <span class="sub">Chức năng chính</span>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap">
+            <a href="marketplace.html" class="btn btn-primary">Chợ NFT</a>
+            <a href="games.html" class="btn btn-outline">Trò chơi</a>
+            <a href="wallet.html" class="btn btn-outline">Ví</a>
+            <a href="transactions.html" class="btn btn-outline">Giao dịch</a>
+            <a href="notifications.html" class="btn btn-outline">Thông báo</a>
+          </div>
+        </div>
 
-            <!-- User Info -->
-            <div id="userInfo"></div>
+        <!-- User Info -->
+        <div id="userInfo"></div>
 
-            <!-- Thông báo nhanh -->
-            <div id="quickNotifications"></div>
-        </main>
+        <!-- Thông báo nhanh -->
+        <div id="quickNotifications"></div>
+      </main>
     </div>
 
     <script>
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user'));
+      const token = localStorage.getItem("token");
+      let user = JSON.parse(localStorage.getItem("user"));
 
-        if (!token || !user) window.location.href = 'login.html';
+      if (!token || !user) window.location.href = "login.html";
 
-        function toggleNav() {
-            document.getElementById('topbarNav').classList.toggle('open');
-        }
+      function toggleNav() {
+        document.getElementById("topbarNav").classList.toggle("open");
+      }
 
-        document.getElementById('userInfo').innerHTML = `
-            <div class="card">
-                <div class="card-header">Thông tin tài khoản</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;max-width:500px;">
-                    <p><strong>Họ tên:</strong></p><p>${user.ho_ten}</p>
-                    <p><strong>Tên đăng nhập:</strong></p><p>${user.ten_nguoi_dung}</p>
-                    <p><strong>Email:</strong></p><p>${user.email}</p>
-                    <p><strong>Vai trò:</strong></p><p>${user.vai_tro === 'quan_tri' ? 'Quản trị' : 'Người dùng'}</p>
-                    <p><strong>Địa chỉ ví:</strong></p><p style="font-family:monospace;font-size:12px;">${user.dia_chi_vi ? user.dia_chi_vi.slice(0, 12) + '...' : 'Chưa có'}</p>
+      // Hàm hiển thị thông tin người dùng lên giao diện
+      function renderUserInfo(walletAddress) {
+        const addressShow = walletAddress || user.dia_chi_vi;
+        const formattedAddress = addressShow
+          ? addressShow.length > 16
+            ? addressShow.slice(0, 12) + "..."
+            : addressShow
+          : "Chưa có";
+
+        document.getElementById("userInfo").innerHTML = `
+                <div class="card">
+                    <div class="card-header">Thông tin tài khoản</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;max-width:500px;">
+                        <p><strong>Họ tên:</strong></p><p>${user.ho_ten || user.ten_nguoi_dung}</p>
+                        <p><strong>Tên đăng nhập:</strong></p><p>${user.ten_nguoi_dung}</p>
+                        <p><strong>Email:</strong></p><p>${user.email || "N/A"}</p>
+                        <p><strong>Vai trò:</strong></p><p>${user.vai_tro === "quan_tri" ? "Quản trị" : "Người dùng"}</p>
+                        <p><strong>Địa chỉ ví:</strong></p><p style="font-family:monospace;font-size:12px;" title="${addressShow || ""}">${formattedAddress}</p>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+      }
 
-        async function loadDashboard() {
-            try {
-                // Wallet
-                const walletRes = await fetch(`http://localhost:5000/api/wallet/${user.ten_nguoi_dung}`);
-                const walletData = await walletRes.json();
-                if (walletData.success) {
-                    const balance = walletData.wallet.so_du || 0;
-                    document.getElementById('walletBalance').textContent = balance;
-                    document.getElementById('statBalance').textContent = balance;
-                }
+      // Render ban đầu
+      renderUserInfo();
 
-                // NFTs
-                const nftRes = await fetch(`http://localhost:5000/api/nfts/owner/${user.dia_chi_vi}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const nftData = await nftRes.json();
-                if (nftData.success) {
-                    document.getElementById('statNFTs').textContent = nftData.nfts.length || 0;
-                }
+      async function loadDashboard() {
+        try {
+          let walletAddress = user.dia_chi_vi || null;
 
-                // Rentals
-                const rentalRes = await fetch(`http://localhost:5000/api/rentals/user/${user.ma_nguoi_dung}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const rentalData = await rentalRes.json();
-                if (rentalData.success) {
-                    const active = rentalData.rentals.filter(r => r.trang_thai_thue === 'dang_thue');
-                    document.getElementById('statRentals').textContent = active.length || 0;
-                    document.getElementById('statTransactions').textContent = rentalData.rentals.length || 0;
-                }
+          // 1. Lấy thông tin Ví từ backend (Tự động fallback theo ma_nguoi_dung nếu cần)
+          let walletRes = await fetch(
+            `http://localhost:5000/api/wallet/${user.ten_nguoi_dung}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+          let walletData = await walletRes.json();
 
-                // Kiểm tra thông báo
-                await checkNotifications();
+          if (
+            !walletData.success &&
+            (user.ma_nguoi_dung || user.id_nguoi_dung || user.id)
+          ) {
+            const userId = user.ma_nguoi_dung || user.id_nguoi_dung || user.id;
+            walletRes = await fetch(
+              `http://localhost:5000/api/wallet/user/${userId}`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              },
+            );
+            walletData = await walletRes.json();
+          }
 
-            } catch (error) {
-                console.error('Lỗi tải dashboard:', error);
+          if (walletData.success && walletData.wallet) {
+            const balance =
+              walletData.wallet.so_du !== undefined
+                ? walletData.wallet.so_du
+                : 0;
+            walletAddress =
+              walletData.wallet.dia_chi || walletData.wallet.address;
+
+            document.getElementById("walletBalance").textContent = balance;
+            document.getElementById("statBalance").textContent = balance;
+
+            // Cập nhật lại thông tin ví vào localStorage nếu dữ liệu cũ chưa có
+            if (walletAddress && user.dia_chi_vi !== walletAddress) {
+              user.dia_chi_vi = walletAddress;
+              localStorage.setItem("user", JSON.stringify(user));
             }
+
+            // Cập nhật lại giao diện Thông tin tài khoản với địa chỉ ví mới lấy được
+            renderUserInfo(walletAddress);
+          }
+
+          // 2. NFTs
+          if (walletAddress) {
+            const nftRes = await fetch(
+              `http://localhost:5000/api/nfts/owner/${walletAddress}`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              },
+            );
+            const nftData = await nftRes.json();
+            if (nftData.success) {
+              document.getElementById("statNFTs").textContent = nftData.nfts
+                ? nftData.nfts.length
+                : 0;
+            }
+          }
+
+          // 3. Rentals
+          const userId = user.ma_nguoi_dung || user.id_nguoi_dung || user.id;
+          if (userId) {
+            const rentalRes = await fetch(
+              `http://localhost:5000/api/rentals/user/${userId}`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              },
+            );
+            const rentalData = await rentalRes.json();
+            if (rentalData.success && rentalData.rentals) {
+              const active = rentalData.rentals.filter(
+                (r) => r.trang_thai_thue === "dang_thue",
+              );
+              document.getElementById("statRentals").textContent =
+                active.length || 0;
+              document.getElementById("statTransactions").textContent =
+                rentalData.rentals.length || 0;
+            }
+          }
+
+          // 4. Kiểm tra thông báo
+          await checkNotifications();
+        } catch (error) {
+          console.error("Lỗi tải dashboard:", error);
         }
+      }
 
-        async function checkNotifications() {
-            try {
-                const expiredRes = await fetch('http://localhost:5000/api/notifications/expired-soon', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const expiredData = await expiredRes.json();
-                
-                const expiredRes2 = await fetch('http://localhost:5000/api/notifications/expired', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const expiredData2 = await expiredRes2.json();
-                
-                const total = (expiredData.success ? expiredData.notifications.length : 0) + 
-                             (expiredData2.success ? expiredData2.expired.length : 0);
+      async function checkNotifications() {
+        try {
+          const expiredRes = await fetch(
+            "http://localhost:5000/api/notifications/expired-soon",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+          const expiredData = await expiredRes.json();
 
-                if (total > 0) {
-                    const badge = document.getElementById('notificationBadge');
-                    badge.style.display = 'inline';
-                    badge.textContent = `${total} thông báo`;
-                }
+          const expiredRes2 = await fetch(
+            "http://localhost:5000/api/notifications/expired",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+          const expiredData2 = await expiredRes2.json();
 
-                // Hiển thị 2 thông báo nhanh
-                let quickHtml = '';
-                if (expiredData.success && expiredData.notifications.length > 0) {
-                    const n = expiredData.notifications[0];
-                    quickHtml += `
+          const total =
+            (expiredData.success && expiredData.notifications
+              ? expiredData.notifications.length
+              : 0) +
+            (expiredData2.success && expiredData2.expired
+              ? expiredData2.expired.length
+              : 0);
+
+          if (total > 0) {
+            const badge = document.getElementById("notificationBadge");
+            badge.style.display = "inline";
+            badge.textContent = `${total} thông báo`;
+          }
+
+          // Hiển thị thông báo nhanh
+          let quickHtml = "";
+          if (
+            expiredData.success &&
+            expiredData.notifications &&
+            expiredData.notifications.length > 0
+          ) {
+            const n = expiredData.notifications[0];
+            quickHtml += `
                         <div class="card" style="border-color:var(--warning);">
                             <div class="card-header">Sắp hết hạn</div>
                             <p>Hợp đồng #${n.ma_hop_dong.slice(0, 8)} còn ${n.con_lai} giờ</p>
                             <a href="rental-detail-view.html?id=${n.ma_hop_dong}" class="btn btn-outline btn-sm">Xem</a>
                         </div>
                     `;
-                }
-                if (expiredData2.success && expiredData2.expired.length > 0) {
-                    const n = expiredData2.expired[0];
-                    quickHtml += `
+          }
+          if (
+            expiredData2.success &&
+            expiredData2.expired &&
+            expiredData2.expired.length > 0
+          ) {
+            const n = expiredData2.expired[0];
+            quickHtml += `
                         <div class="card" style="border-color:var(--danger);">
                             <div class="card-header">Đã hết hạn</div>
                             <p>Hợp đồng #${n.ma_hop_dong.slice(0, 8)} đã hết hạn</p>
                             <a href="rental-detail-view.html?id=${n.ma_hop_dong}" class="btn btn-danger btn-sm">Trả ngay</a>
                         </div>
                     `;
-                }
-                document.getElementById('quickNotifications').innerHTML = quickHtml;
-
-            } catch (error) {
-                console.error('Lỗi kiểm tra thông báo:', error);
-            }
+          }
+          document.getElementById("quickNotifications").innerHTML = quickHtml;
+        } catch (error) {
+          console.error("Lỗi kiểm tra thông báo:", error);
         }
+      }
 
-        loadDashboard();
+      loadDashboard();
 
-        // Tự động refresh mỗi 30 giây
-        setInterval(loadDashboard, 30000);
+      // Tự động refresh mỗi 30 giây
+      setInterval(loadDashboard, 30000);
 
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "login.html";
         });
     </script>
-</body>
+  </body>
 </html>
