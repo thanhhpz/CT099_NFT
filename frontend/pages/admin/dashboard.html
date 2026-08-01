@@ -21,9 +21,6 @@
             <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
         </div>
         <div class="topbar-right">
-            <div class="balance-box">
-                <span class="amount" id="walletBalance">0</span> COINS
-            </div>
             <button class="topbar-toggle" onclick="toggleNav()">☰</button>
         </div>
     </header>
@@ -151,52 +148,8 @@
             }
         }
 
-        async function loadWalletBalance() {
-            try {
-                const response = await fetch(
-                    `http://localhost:5000/api/wallet/${user.ten_nguoi_dung}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-                    throw new Error(
-                        data.message || 'Không thể tải số dư ví'
-                    );
-                }
-
-                const wallet =
-                    data.wallet ||
-                    data.vi ||
-                    data.data ||
-                    {};
-
-                const balance = Number(
-                    wallet.so_du ?? data.so_du ?? 0
-                );
-
-                document.getElementById(
-                    'walletBalance'
-                ).textContent = Number.isInteger(balance)
-                    ? balance
-                    : balance.toFixed(2).replace(/\.?0+$/, '');
-
-            } catch (error) {
-                console.error('Lỗi tải số dư ví:', error);
-
-                document.getElementById(
-                    'walletBalance'
-                ).textContent = '0';
-            }
-        }
 
         loadStats();
-        loadWalletBalance();
 
         document.getElementById('logoutBtn').addEventListener('click', function(e) {
             e.preventDefault();
