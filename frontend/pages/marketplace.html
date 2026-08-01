@@ -110,7 +110,15 @@
                                 ${nft.ten}
                             </div>
                             <div class="nft-name">${nft.ten}</div>
-                            <div class="nft-desc">${nft.mo_ta || 'Không có mô tả'}</div>
+
+                            <div class="nft-game">
+                                Trò chơi:
+                                <strong>${nft.ten_game || 'Không rõ trò chơi'}</strong>
+                            </div>
+
+                            <div class="nft-desc">
+                                ${nft.mo_ta || 'Không có mô tả'}
+                            </div>
                             <div class="nft-meta">
                                 <span><span class="nft-price">${nft.gia_thue}</span> COINS/ngày</span>
                                 <span><span class="badge ${statusClass[nft.trang_thai] || 'badge'}">${statusMap[nft.trang_thai] || nft.trang_thai}</span></span>
@@ -134,9 +142,10 @@
 
         document.getElementById('searchInput').addEventListener('input', function() {
             const keyword = this.value.toLowerCase().trim();
-            const filtered = allNFTs.filter(n => 
+            const filtered = allNFTs.filter(n =>
                 (n.ten || '').toLowerCase().includes(keyword) ||
-                (n.mo_ta || '').toLowerCase().includes(keyword)
+                (n.mo_ta || '').toLowerCase().includes(keyword) ||
+                (n.ten_game || '').toLowerCase().includes(keyword)
             );
             renderNFTs(filtered);
         });

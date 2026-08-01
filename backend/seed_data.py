@@ -55,7 +55,6 @@ def seed_database():
     db.vi.delete_many({})
     db.hopdong.delete_many({})
     db.giaodich.delete_many({})
-    db.danhgia.delete_many({})
     print("\n🗑️ Đã xóa dữ liệu cũ")
     
     # ============================================================
@@ -440,25 +439,7 @@ def seed_database():
             print(f"  ✅ Giao dịch thanh toán: {giao_dich['so_tien_giao_dich']} COINS")
     
     # ============================================================
-    # 8. TẠO ĐÁNH GIÁ MẪU
-    # ============================================================
-    print("\n⭐ TẠO ĐÁNH GIÁ MẪU:")
-    
-    # Lấy hợp đồng đã tạo
-    hopdong = db.hopdong.find_one({})
-    if hopdong:
-        danhgia = {
-            "ma_danh_gia": str(uuid.uuid4()),
-            "ma_hop_dong": hopdong["ma_hop_dong"],
-            "noi_dung": "Rất hài lòng với dịch vụ cho thuê NFT, giao dịch nhanh chóng và an toàn!",
-            "so_sao": 5,
-            "created_at": datetime.datetime.utcnow()
-        }
-        db.danhgia.insert_one(danhgia)
-        print(f"  ✅ Đánh giá 5 sao cho hợp đồng {hopdong['ma_hop_dong'][:8]}")
-    
-    # ============================================================
-    # 9. THỐNG KÊ DỮ LIỆU
+    # 8. THỐNG KÊ DỮ LIỆU
     # ============================================================
     print("\n" + "=" * 60)
     print("📊 THỐNG KÊ DỮ LIỆU ĐÃ TẠO:")
@@ -471,7 +452,6 @@ def seed_database():
     print(f"  🖼️ NFT:           {db.nft.count_documents({})}")
     print(f"  📋 Hợp đồng thuê: {db.hopdong.count_documents({})}")
     print(f"  💳 Giao dịch:     {db.giaodich.count_documents({})}")
-    print(f"  ⭐ Đánh giá:      {db.danhgia.count_documents({})}")
     print("=" * 60)
     print("✅ HOÀN TẤT TẠO DỮ LIỆU MẪU!")
     print("=" * 60)

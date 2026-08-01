@@ -5,6 +5,7 @@ from models.nguoidung_model import NguoiDung
 from models.wallet_model import Wallet
 from models.hopdong_model import HopDong
 from models.giaodich_model import GiaoDich
+from models.game_model import Game
 import datetime
 import jwt
 from config import Config
@@ -242,13 +243,53 @@ def nft_routes(app):
     @app.route('/api/nfts/available', methods=['GET'])
     def get_available_nfts():
         nfts = NFT.find_available()
+
         for nft in nfts:
-            wallet = Wallet.find_by_address(nft['dia_chi_chu_so_huu'])
-            nft['ten_chu_so_huu'] = wallet.get('ten_nguoi_dung', 'Không rõ') if wallet else 'Không rõ'
-            item = VatPham.find_by_ma(nft.get('ma_vat_pham'))
-            nft['ten_vat_pham'] = item.get('ten_vat_pham', 'Không rõ') if item else 'Không rõ'
+            # Lấy tên chủ sở hữu
+            wallet = Wallet.find_by_address(
+                nft['dia_chi_chu_so_huu']
+            )
+
+            nft['ten_chu_so_huu'] = (
+                wallet.get('ten_nguoi_dung', 'Không rõ')
+                if wallet
+                else 'Không rõ'
+            )
+
+            # Lấy vật phẩm gốc của NFT
+            item = VatPham.find_by_ma(
+                nft.get('ma_vat_pham')
+            )
+
+            if item:
+                nft['ten_vat_pham'] = item.get(
+                    'ten_vat_pham',
+                    'Không rõ'
+                )
+
+                nft['ma_game'] = item.get('ma_game')
+
+                # Lấy tên game từ database
+                game = Game.find_by_ma(
+                    item.get('ma_game')
+                )
+
+                nft['ten_game'] = (
+                    game.get('ten_game', 'Không rõ trò chơi')
+                    if game
+                    else 'Không rõ trò chơi'
+                )
+            else:
+                nft['ten_vat_pham'] = 'Không rõ'
+                nft['ma_game'] = None
+                nft['ten_game'] = 'Không rõ trò chơi'
+
             nft['nguoi_thue'] = None
-        return jsonify({'success': True, 'nfts': nfts}), 200
+
+        return jsonify({
+            'success': True,
+            'nfts': nfts
+        }), 200
     
     @app.route('/api/nfts/owner/<dia_chi_vi>', methods=['GET'])
     def get_nfts_by_owner(dia_chi_vi):

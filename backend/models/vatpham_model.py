@@ -1,4 +1,5 @@
 from database.connection import vatpham_collection
+from models.nhanvat_vatpham_model import NhanVatVatPham
 import datetime
 import uuid
 
@@ -57,7 +58,28 @@ class VatPham:
     
     @staticmethod
     def find_by_character(ma_nhan_vat):
-        return list(vatpham_collection.find({'duoc_dung_cho': ma_nhan_vat}, {'_id': 0}))
+        relations = NhanVatVatPham.find_by_nhan_vat(
+            ma_nhan_vat
+        )
+
+        ma_vat_pham_list = [
+            relation['ma_vat_pham']
+            for relation in relations
+        ]
+
+        if not ma_vat_pham_list:
+            return []
+
+        return list(
+            vatpham_collection.find(
+                {
+                    'ma_vat_pham': {
+                        '$in': ma_vat_pham_list
+                    }
+                },
+                {'_id': 0}
+            )
+        )
     
     @staticmethod
     def find_available():

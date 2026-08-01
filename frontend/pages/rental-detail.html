@@ -134,21 +134,44 @@
                                     <span class="hint">Tối đa 24 giờ</span>
                                 </div>
 
-                                <!-- NHÂN VẬT -->
+                                <!-- NHÂN VẬT PHÙ HỢP -->
                                 <div class="form-group">
-                                    <label>Chọn nhân vật sử dụng</label>
-                                    <select id="rentCharacter" required>
-                                        <option value="">-- Chọn nhân vật --</option>
-                                    </select>
-                                    <div id="characterSuggestion" style="font-size:13px;color:var(--text-muted);margin-top:4px;"></div>
+                                    <label>Nhân vật phù hợp</label>
+
+                                    <div
+                                        id="compatibleCharacters"
+                                        class="compatible-character-list"
+                                    >
+                                        Đang tải danh sách nhân vật...
+                                    </div>
+
+                                    <span class="hint">
+                                        Đây là các nhân vật có thể sử dụng vật phẩm.
+                                        Bạn không cần chọn nhân vật khi thuê.
+                                    </span>
                                 </div>
 
                                 <!-- TỔNG KẾT -->
                                 <div id="priceSummary" style="background:var(--bg-input);padding:12px 16px;border:1px solid var(--border-color);margin-bottom:16px;">
-                                    <p><strong>Đơn vị thuê:</strong> <span id="summaryUnit">ngày</span></p>
-                                    <p><strong>Tổng tiền thuê:</strong> <span id="totalPrice">0</span> COINS</p>
-                                    <p><strong>Tiền cọc (20%):</strong> <span id="depositAmount">0</span> COINS</p>
-                                    <p><strong>Tổng thanh toán:</strong> <span id="totalPayment">0</span> COINS</p>
+                                    <p>
+                                        <strong>Đơn vị thuê:</strong>
+                                        <span id="summaryUnit">ngày</span>
+                                    </p>
+
+                                    <p>
+                                        <strong>Tổng tiền thuê:</strong>
+                                        <span id="totalPrice">0</span> COINS
+                                    </p>
+
+                                    <p>
+                                        <strong>Phí dịch vụ (5%):</strong>
+                                        <span id="serviceFee">0</span> COINS
+                                    </p>
+
+                                    <p>
+                                        <strong>Tổng thanh toán:</strong>
+                                        <span id="totalPayment">0</span> COINS
+                                    </p>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary w-full">Xác nhận thuê</button>
@@ -184,54 +207,61 @@
       // ============================================================
 
       async function loadSuggestedCharacters() {
+        const container = document.getElementById(
+          "compatibleCharacters",
+        );
+
         try {
-          const itemRes = await fetch(
-            `http://localhost:5000/api/items/${nftData.ma_vat_pham}`,
-          );
-          const itemData = await itemRes.json();
-          if (!itemData.success) return;
-
-          const item = itemData.item;
-          const select = document.getElementById("rentCharacter");
-          const suggestionDiv = document.getElementById("characterSuggestion");
-
-          // Gọi API đề xuất nhân vật
-          const suggestRes = await fetch(
+          const response = await fetch(
             `http://localhost:5000/api/rentals/suggest-characters/${nftData.ma_vat_pham}`,
             {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             },
           );
-          const suggestData = await suggestRes.json();
 
-          if (suggestData.success && suggestData.suggested.length > 0) {
-            suggestionDiv.innerHTML = `Đề xuất: ${suggestData.suggested.map((c) => c.ten_nhan_vat).join(", ")}`;
-            for (const char of suggestData.suggested) {
-              select.innerHTML += `<option value="${char.ma_nhan_vat}">${char.ten_nhan_vat} (Phù hợp)</option>`;
-            }
-          } else {
-            // Lấy tất cả nhân vật từ game
-            const gamesRes = await fetch("http://localhost:5000/api/games");
-            const gamesData = await gamesRes.json();
-            if (gamesData.success) {
-              for (const game of gamesData.games) {
-                const charsRes = await fetch(
-                  `http://localhost:5000/api/games/${game.ma_game}/characters`,
-                );
-                const charsData = await charsRes.json();
-                if (charsData.success) {
-                  for (const char of charsData.characters) {
-                    select.innerHTML += `<option value="${char.ma_nhan_vat}">${char.ten_nhan_vat} (${game.ten_game})</option>`;
-                  }
-                }
-              }
-            }
+          const data = await response.json();
+
+          if (!data.success) {
+            container.innerHTML =
+              `<span class="text-muted">
+                Không thể tải nhân vật phù hợp
+              </span>`;
+            return;
           }
 
-          updatePrice();
+          if (!data.suggested || data.suggested.length === 0) {
+            container.innerHTML =
+              `<span class="text-muted">
+                Chưa thiết lập nhân vật phù hợp cho vật phẩm này
+              </span>`;
+            return;
+          }
+
+          container.innerHTML = data.suggested
+            .map(
+              (character) => `
+                <div class="compatible-character-item">
+                  <span class="compatible-icon">✓</span>
+                  <span>${character.ten_nhan_vat}</span>
+                </div>
+              `,
+            )
+            .join("");
         } catch (error) {
-          console.error("Lỗi tải nhân vật:", error);
+          console.error(
+            "Lỗi tải nhân vật phù hợp:",
+            error,
+          );
+
+          container.innerHTML =
+            `<span class="text-muted">
+              Lỗi kết nối khi tải nhân vật
+            </span>`;
         }
+
+        updatePrice();
       }
 
       // ============================================================
@@ -247,33 +277,50 @@
         updatePrice();
       }
 
+      function formatCoin(value) {
+        const number = Number(value) || 0;
+
+        return Number.isInteger(number)
+          ? number.toString()
+          : number.toFixed(2).replace(/\.?0+$/, "");
+      }
+
       function updatePrice() {
         const unit = document.getElementById("rentUnit").value;
+
         let days = 0;
-        let hours = 0;
 
         if (unit === "ngay") {
-          days = parseInt(document.getElementById("rentDays").value) || 0;
-          hours = days * 24;
+          days =
+            parseInt(document.getElementById("rentDays").value, 10) || 0;
         } else if (unit === "gio") {
-          hours = parseInt(document.getElementById("rentHours").value) || 0;
+          const hours =
+            parseInt(document.getElementById("rentHours").value, 10) || 0;
+
           days = hours / 24;
         } else if (unit === "tuan") {
-          days = (parseInt(document.getElementById("rentDays").value) || 0) * 7;
-          hours = days * 24;
+          const weeks =
+            parseInt(document.getElementById("rentDays").value, 10) || 0;
+
+          days = weeks * 7;
         }
 
-        const pricePerDay = nftData?.gia_thue || 0;
-        const total = days * pricePerDay;
-        const deposit = total * 0.2;
+        const pricePerDay = Number(nftData?.gia_thue) || 0;
+
+        const totalPrice = days * pricePerDay;
+        const serviceFee = totalPrice * 0.05;
+        const totalPayment = totalPrice + serviceFee;
 
         document.getElementById("summaryUnit").textContent = unit;
-        document.getElementById("totalPrice").textContent = Math.round(total);
-        document.getElementById("depositAmount").textContent =
-          Math.round(deposit);
-        document.getElementById("totalPayment").textContent = Math.round(
-          total + deposit,
-        );
+
+        document.getElementById("totalPrice").textContent =
+          formatCoin(totalPrice);
+
+        document.getElementById("serviceFee").textContent =
+          formatCoin(serviceFee);
+
+        document.getElementById("totalPayment").textContent =
+          formatCoin(totalPayment);
       }
 
       // ============================================================
@@ -325,38 +372,13 @@
             }
           }
 
-          const characterId = document.getElementById("rentCharacter").value;
-          if (!characterId) {
-            alert("Vui lòng chọn nhân vật sử dụng");
-            return;
-          }
-
-          // Kiểm tra tương thích
-          try {
-            const compatRes = await fetch(
-              `http://localhost:5000/api/characters/${characterId}/compatibility/${nftData.ma_vat_pham}`,
-            );
-            const compatData = await compatRes.json();
-            if (compatData.success && !compatData.compatible) {
-              alert("Nhân vật này không thể sử dụng vật phẩm này");
-              return;
-            }
-          } catch (e) {}
-
-          // Xác nhận
-          const confirmMsg =
-            unit === "gio"
-              ? `Xác nhận thuê NFT "${nftData.ten}" trong ${so_gio} giờ?`
-              : `Xác nhận thuê NFT "${nftData.ten}" trong ${so_ngay_thue} ngày?`;
-
-          if (!confirm(confirmMsg)) return;
+          
 
           // Gửi request
           try {
             const body = {
               ma_bai_dang: nftData.ma_vat_pham,
               ma_nguoi_thue: user.ma_nguoi_dung,
-              ma_nhan_vat: characterId,
             };
 
             if (unit === "gio") {
@@ -368,7 +390,7 @@
             }
 
             const res = await fetch(
-              "http://localhost:5000/api/rentals/create",
+              "http://localhost:5000/api/rentals/prepare",
               {
                 method: "POST",
                 headers: {
@@ -382,8 +404,14 @@
             const data = await res.json();
 
             if (data.success) {
-              alert("Thuê NFT thành công!");
-              window.location.href = "rentals.html";
+              console.log("PAYMENT DATA:", data.payment);
+
+              sessionStorage.setItem(
+                "rentalPayment",
+                JSON.stringify(data.payment),
+              );
+
+              window.location.href = "payment.html";
             } else {
               alert("Lỗi: " + data.message);
             }

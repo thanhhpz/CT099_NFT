@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>NFT Rental Wallet</title>
+
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/sign.css" />
+    </head>
+
+    <body>
+        <header class="topbar">
+            <div class="topbar-brand">
+                NFT <span>RENTAL</span>
+            </div>
+
+            <div class="topbar-nav" id="topbarNav">
+                <a href="dashboard.html">Tổng quan</a>
+                <a href="games.html">Trò chơi</a>
+                <a href="marketplace.html">Chợ NFT</a>
+                <a href="my-nfts.html">NFT của tôi</a>
+                <a href="rentals.html">Thuê</a>
+                <a href="wallet.html">Ví</a>
+                <a href="transactions.html">Giao dịch</a>
+                <a href="notifications.html">Thông báo</a>
+                <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+            </div>
+
+            <div class="topbar-right">
+                <div class="balance-box">
+                    <span class="amount" id="walletBalance">0</span> COINS
+                </div>
+
+                <button class="topbar-toggle" onclick="toggleNav()">☰</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <main class="sign-page">
+                <h2 class="sign-page-title">NFT Rental Wallet</h2>
+
+                <section class="sign-card">
+                    <div class="sign-row">
+                        <span class="sign-label">Tài khoản</span>
+                        <strong id="signAccount">—</strong>
+                    </div>
+
+                    <div class="sign-row">
+                        <span class="sign-label">Số dư</span>
+                        <strong>
+                            <span id="signBalance">0</span> COINS
+                        </strong>
+                    </div>
+
+                    <div class="sign-row">
+                        <span class="sign-label">Thông điệp</span>
+                        <strong id="signMessage">—</strong>
+                    </div>
+
+                    <div class="sign-row">
+                        <span class="sign-label">Mã giao dịch</span>
+                        <strong id="signHash">—</strong>
+                    </div>
+
+                    <div class="sign-row">
+                        <span class="sign-label">Thời gian thuê</span>
+                        <strong id="signDuration">—</strong>
+                    </div>
+
+                    <div class="sign-row">
+                        <span class="sign-label">Tổng thanh toán</span>
+                        <strong>
+                            <span id="signRentPrice">0</span> COINS
+                        </strong>
+                    </div>
+
+                </section>
+
+                <div class="sign-actions">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="cancelSignBtn">
+                        Hủy
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="signTransactionBtn">
+                        Ký
+                    </button>
+                </div>
+            </main>
+        </div>
+
+        <script>
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
+      const paymentText = sessionStorage.getItem("rentalPayment");
+
+      if (!token || !user) {
+        window.location.href = "login.html";
+      }
+
+      if (!paymentText) {
+        alert("Không tìm thấy thông tin giao dịch");
+        window.location.href = "marketplace.html";
+      }
+
+      const payment = JSON.parse(paymentText);
+
+      function toggleNav() {
+        document
+          .getElementById("topbarNav")
+          .classList.toggle("open");
+      }
+
+      function formatCoin(value) {
+        const number = Number(value) || 0;
+
+        return Number.isInteger(number)
+          ? number.toString()
+          : number.toFixed(2).replace(/\.?0+$/, "");
+      }
+
+      function shortenAddress(address) {
+        if (!address) return "Không rõ";
+
+        if (address.length <= 18) {
+          return address;
+        }
+
+        return `${address.slice(0, 10)}...${address.slice(-6)}`;
+      }
+
+      function createTemporaryHash() {
+        const hashSource = [
+          payment.ma_nft,
+          payment.ma_vat_pham,
+          payment.ma_nhan_vat,
+          payment.dia_chi_nguoi_thue,
+          payment.dia_chi_chu_so_huu,
+          payment.tong_thanh_toan,
+          payment.thoi_gian_bat_dau,
+        ].join("|");
+
+        let hashValue = 0;
+
+        for (let index = 0; index < hashSource.length; index++) {
+          hashValue =
+            (hashValue * 31 + hashSource.charCodeAt(index)) >>> 0;
+        }
+
+        return `0x${hashValue
+          .toString(16)
+          .padStart(8, "0")}${Date.now().toString(16)}`;
+      }
+
+      function renderSignPage() {
+        const isExtension =
+            payment.transaction_type === "extend_rental";
+
+            document.querySelector(".sign-page-title").textContent =
+            isExtension
+                ? "Ký giao dịch gia hạn"
+                : "NFT Rental Wallet";
+
+            const durationLabel = document
+            .getElementById("signDuration")
+            .closest(".sign-row")
+            .querySelector(".sign-label");
+
+            durationLabel.textContent =
+            isExtension
+                ? "Thời gian gia hạn"
+                : "Thời gian thuê";
+            const totalLabel = document
+                .getElementById("signRentPrice")
+                .closest(".sign-row")
+                .querySelector(".sign-label");
+
+                totalLabel.textContent =
+                isExtension
+                    ? "Tổng thanh toán gia hạn"
+                    : "Tổng thanh toán";
+        const transactionHash =
+          payment.transaction_hash || createTemporaryHash();
+
+        payment.transaction_hash = transactionHash;
+
+        sessionStorage.setItem(
+          "rentalPayment",
+          JSON.stringify(payment),
+        );
+
+        document.getElementById("signAccount").textContent =
+          shortenAddress(payment.dia_chi_nguoi_thue);
+
+        document.getElementById("signBalance").textContent =
+          formatCoin(payment.so_du_hien_tai);
+
+        document.getElementById("signMessage").textContent =
+            isExtension
+                ? `Gia hạn NFT ${payment.ten_nft || "Không rõ"}`
+                : `Thuê NFT ${payment.ten_nft || "Không rõ"}`;
+
+        document.getElementById("signDuration").textContent =
+          payment.thoi_luong_hien_thi || "Không rõ";
+
+        document.getElementById("signRentPrice").textContent =
+          formatCoin(payment.tong_thanh_toan);
+
+        document.getElementById("signHash").textContent =
+          transactionHash;
+
+        document.getElementById("walletBalance").textContent =
+          formatCoin(payment.so_du_hien_tai);
+      }
+
+      document
+        .getElementById("cancelSignBtn")
+        .addEventListener("click", function () {
+            sessionStorage.removeItem("rentalPayment");
+
+            if (
+            payment.transaction_type === "extend_rental" &&
+            payment.ma_hop_dong
+            ) {
+            window.location.href =
+                `rental-detail-view.html?id=${payment.ma_hop_dong}`;
+            return;
+            }
+
+            window.location.href = "marketplace.html";
+        });
+
+      document
+        .getElementById("signTransactionBtn")
+        .addEventListener("click", function () {
+          payment.signature_status = "signed";
+
+          sessionStorage.setItem(
+            "rentalPayment",
+            JSON.stringify(payment),
+          );
+
+          window.location.href = "confirm-rental.html";
+        });
+
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function (event) {
+          event.preventDefault();
+
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          sessionStorage.removeItem("rentalPayment");
+
+          window.location.href = "login.html";
+        });
+
+      renderSignPage();
+    </script>
+    </body>
+</html>
