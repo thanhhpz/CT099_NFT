@@ -491,8 +491,7 @@ def admin_routes(app):
                 'total_items': len(VatPham.find_all()),
                 'total_nfts': len(NFT.find_all()),
                 'total_rentals': len(HopDong.find_all()),
-                'total_transactions': len(GiaoDich.find_all()),
-                'total_reviews': len(DanhGia.find_all())
+                'total_transactions': len(GiaoDich.find_all())
             }
             return jsonify({'success': True, 'stats': stats}), 200
         except Exception as e:

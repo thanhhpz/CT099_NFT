@@ -37,17 +37,35 @@
                     <div class="number" id="totalUsers">0</div>
                     <div class="label">Người dùng</div>
                 </div>
+
                 <div class="stat-card">
                     <div class="number" id="totalGames">0</div>
                     <div class="label">Trò chơi</div>
                 </div>
+
+                <div class="stat-card">
+                    <div class="number" id="totalCharacters">0</div>
+                    <div class="label">Nhân vật</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="number" id="totalItems">0</div>
+                    <div class="label">Vật phẩm</div>
+                </div>
+
                 <div class="stat-card">
                     <div class="number" id="totalNFTs">0</div>
                     <div class="label">NFT</div>
                 </div>
+
                 <div class="stat-card">
                     <div class="number" id="totalRentals">0</div>
                     <div class="label">Hợp đồng thuê</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="number" id="totalTransactions">0</div>
+                    <div class="label">Giao dịch</div>
                 </div>
             </div>
 
@@ -77,23 +95,108 @@
 
         async function loadStats() {
             try {
-                const res = await fetch('http://localhost:5000/api/admin/stats', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
+                const response = await fetch(
+                    'http://localhost:5000/api/admin/stats',
+                    {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
-                if (data.success) {
-                    document.getElementById('totalUsers').textContent = data.stats.total_users || 0;
-                    document.getElementById('totalGames').textContent = data.stats.total_games || 0;
-                    document.getElementById('totalNFTs').textContent = data.stats.total_nfts || 0;
-                    document.getElementById('totalRentals').textContent = data.stats.total_rentals || 0;
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message || 'Không thể tải thống kê'
+                    );
                 }
+
+                document.getElementById(
+                    'totalUsers'
+                ).textContent = data.stats.total_users ?? 0;
+
+                document.getElementById(
+                    'totalGames'
+                ).textContent = data.stats.total_games ?? 0;
+
+                document.getElementById(
+                    'totalCharacters'
+                ).textContent = data.stats.total_characters ?? 0;
+
+                document.getElementById(
+                    'totalItems'
+                ).textContent = data.stats.total_items ?? 0;
+
+                document.getElementById(
+                    'totalNFTs'
+                ).textContent = data.stats.total_nfts ?? 0;
+
+                document.getElementById(
+                    'totalRentals'
+                ).textContent = data.stats.total_rentals ?? 0;
+
+                document.getElementById(
+                    'totalTransactions'
+                ).textContent = data.stats.total_transactions ?? 0;
+
             } catch (error) {
                 console.error('Lỗi tải thống kê:', error);
+
+                alert(
+                    'Không thể tải thống kê Admin: ' +
+                    error.message
+                );
+            }
+        }
+
+        async function loadWalletBalance() {
+            try {
+                const response = await fetch(
+                    `http://localhost:5000/api/wallet/${user.ten_nguoi_dung}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message || 'Không thể tải số dư ví'
+                    );
+                }
+
+                const wallet =
+                    data.wallet ||
+                    data.vi ||
+                    data.data ||
+                    {};
+
+                const balance = Number(
+                    wallet.so_du ?? data.so_du ?? 0
+                );
+
+                document.getElementById(
+                    'walletBalance'
+                ).textContent = Number.isInteger(balance)
+                    ? balance
+                    : balance.toFixed(2).replace(/\.?0+$/, '');
+
+            } catch (error) {
+                console.error('Lỗi tải số dư ví:', error);
+
+                document.getElementById(
+                    'walletBalance'
+                ).textContent = '0';
             }
         }
 
         loadStats();
+        loadWalletBalance();
 
         document.getElementById('logoutBtn').addEventListener('click', function(e) {
             e.preventDefault();
