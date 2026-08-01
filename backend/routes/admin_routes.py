@@ -6,7 +6,6 @@ from models.vatpham_model import VatPham
 from models.nft_model import NFT
 from models.hopdong_model import HopDong
 from models.giaodich_model import GiaoDich
-from models.danhgia_model import DanhGia
 from models.wallet_model import Wallet
 import jwt
 from config import Config

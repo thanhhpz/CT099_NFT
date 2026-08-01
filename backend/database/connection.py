@@ -31,8 +31,16 @@ class Database:
     
     def _create_collections(self):
         collections = [
-            'nguoidung', 'game', 'nhanvat', 'danhmucvatpham',
-            'vatpham', 'hopdong', 'giaodich', 'danhgia', 'nft', 'vi'
+            'nguoidung',
+            'game',
+            'nhanvat',
+            'danhmucvatpham',
+            'vatpham',
+            'nhanvat_vatpham',
+            'hopdong',
+            'giaodich',
+            'nft',
+            'vi'
         ]
         existing = self.db.list_collection_names()
         for coll in collections:
@@ -49,8 +57,8 @@ game_collection = db['game']
 nhanvat_collection = db['nhanvat']
 danhmucvatpham_collection = db['danhmucvatpham']
 vatpham_collection = db['vatpham']
+nhanvat_vatpham_collection = db['nhanvat_vatpham']
 hopdong_collection = db['hopdong']
 giaodich_collection = db['giaodich']
-danhgia_collection = db['danhgia']
 nft_collection = db['nft']
 vi_collection = db['vi']

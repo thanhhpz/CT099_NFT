@@ -1,124 +1,46 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết hợp đồng</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <style>
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px 20px;
-            padding: 4px 0;
-        }
-        .info-grid .label {
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-        .info-grid .value {
-            color: var(--text-primary);
-        }
-        .section-title {
-            font-weight: 700;
-            font-size: 14px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-            margin-top: 12px;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-        .msg-error {
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 10px 14px;
-            margin-top: 10px;
-            background: var(--danger-dim);
-        }
-        .contract-id {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-        .price-detail {
-            background: var(--bg-input);
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            margin: 6px 0;
-        }
-        .price-detail .row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 14px;
-        }
-        .price-detail .row.total {
-            font-weight: 700;
-            font-size: 16px;
-            border-top: 2px solid var(--border-color);
-            padding-top: 8px;
-            margin-top: 4px;
-        }
-        .price-detail .row .label {
-            color: var(--text-secondary);
-        }
-        .price-detail .row .value {
-            font-weight: 600;
-        }
-        .price-detail .row .value.fee {
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-        .price-detail .row .value.total-amount {
-            color: var(--gold);
-            font-size: 18px;
-        }
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-                gap: 2px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header class="topbar">
-        <div class="topbar-brand">NFT <span>RENTAL</span></div>
-        <div class="topbar-nav" id="topbarNav">
-            <a href="dashboard.html">Tổng quan</a>
-            <a href="games.html">Trò chơi</a>
-            <a href="marketplace.html">Chợ NFT</a>
-            <a href="my-nfts.html">NFT của tôi</a>
-            <a href="rentals.html" class="active">Thuê</a>
-            <a href="wallet.html">Ví</a>
-            <a href="transactions.html">Giao dịch</a>
-            <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
-        </div>
-        <div class="topbar-right">
-            <div class="balance-box">
-                <span class="amount" id="walletBalance">0</span> COINS
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chi tiết hợp đồng</title>
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/rental-detail-view.css">
+    </head>
+    <body>
+        <header class="topbar">
+            <div class="topbar-brand">NFT <span>RENTAL</span></div>
+            <div class="topbar-nav" id="topbarNav">
+                <a href="dashboard.html">Tổng quan</a>
+                <a href="games.html">Trò chơi</a>
+                <a href="marketplace.html">Chợ NFT</a>
+                <a href="my-nfts.html">NFT của tôi</a>
+                <a href="rentals.html" class="active">Thuê</a>
+                <a href="wallet.html">Ví</a>
+                <a href="transactions.html">Giao dịch</a>
+                <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
             </div>
-            <button class="topbar-toggle" onclick="toggleNav()">☰</button>
+            <div class="topbar-right">
+                <div class="balance-box">
+                    <span class="amount" id="walletBalance">0</span> COINS
+                </div>
+                <button class="topbar-toggle" onclick="toggleNav()">☰</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <main>
+                <h2
+                    style="font-size:18px;font-weight:600;margin-bottom:14px;">Chi
+                    tiết hợp đồng</h2>
+                <a href="rentals.html" class="btn btn-outline btn-sm"
+                    style="margin-bottom:12px;">← Quay lại</a>
+
+                <div id="contractDetail"></div>
+            </main>
         </div>
-    </header>
 
-    <div class="container">
-        <main>
-            <h2 style="font-size:18px;font-weight:600;margin-bottom:14px;">Chi tiết hợp đồng</h2>
-            <a href="rentals.html" class="btn btn-outline btn-sm" style="margin-bottom:12px;">← Quay lại</a>
-
-            <div id="contractDetail"></div>
-        </main>
-    </div>
-
-    <script>
+        <script>
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user'));
 
@@ -186,6 +108,7 @@
         }
 
         function renderContract(data) {
+            window.currentContractData = data;
             const container = document.getElementById('contractDetail');
             const hd = data.hop_dong;
             const vp = data.vat_pham;
@@ -237,10 +160,9 @@
             // ============================================================
             // 🔥 CHI TIẾT TIỀN - MINH BẠCH 60.5 COINS
             // ============================================================
-            const tongTienThue = hd.tong_tien || 0;          // 10 COINS
-            const tienCoc = hd.tien_coc || 0;                // 50 COINS
-            const phiDichVu = hd.phi_dich_vu || 0;           // 0.5 COINS
-            const tongThanhToan = tongTienThue + tienCoc + phiDichVu;  // 60.5 COINS
+            const tongTienThue = Number(hd.tong_tien || 0);
+            const phiDichVu = Number(hd.phi_dich_vu || 0);
+            const tongThanhToan = tongTienThue + phiDichVu;
 
             // Lấy tỷ lệ phí từ config (nếu có)
             const tyLePhi = data.ty_le_phi || 5;  // Mặc định 5%
@@ -275,6 +197,10 @@
                             <span class="value">${nft.gia_thue} COINS/ngày</span>
                             <span class="label">Trạng thái</span>
                             <span class="value"><span class="badge ${nft.trang_thai === 'co_san' ? 'badge-success' : nft.trang_thai === 'dang_thue' ? 'badge-warning' : 'badge-danger'}">${nft.trang_thai === 'co_san' ? 'Có sẵn' : nft.trang_thai === 'dang_thue' ? 'Đang thuê' : 'Tạm ngưng'}</span></span>
+                            <span class="label">Thanh toán</span>
+                            <span class="value">
+                                <span class="badge badge-success">Đã thanh toán</span>
+                            </span>
                         </div>
                     ` : `
                         <p style="color:var(--text-muted);">Không có NFT</p>
@@ -298,25 +224,33 @@
                     <div class="section-title">Chi tiết thanh toán</div>
                     <div class="price-detail">
                         <div class="row">
-                            <span class="label">Tiền thuê (${hd.so_ngay_thue || 1} ngày × ${vp ? vp.gia_thue : 0} COINS)</span>
+                            <span class="label">
+                                Tiền thuê (${hd.so_ngay_thue || 1} ngày × ${vp ? vp.gia_thue : 0} COINS)
+                            </span>
                             <span class="value">${tongTienThue} COINS</span>
                         </div>
-                        <div class="row">
-                            <span class="label">Tiền cọc (bảo đảm)</span>
-                            <span class="value">${tienCoc} COINS</span>
-                        </div>
+
                         ${phiDichVu > 0 ? `
                             <div class="row">
                                 <span class="label">Phí dịch vụ (${tyLePhi}%)</span>
                                 <span class="value fee">+ ${phiDichVu} COINS</span>
                             </div>
                         ` : ''}
+
                         <div class="row total">
                             <span class="label">Tổng thanh toán</span>
                             <span class="value total-amount">${tongThanhToan} COINS</span>
                         </div>
+
                         ${phiDichVu > 0 ? `
-                            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;text-align:right;border-top:1px dashed var(--border-color);padding-top:6px;">
+                            <div style="
+                                font-size:12px;
+                                color:var(--text-muted);
+                                margin-top:6px;
+                                text-align:right;
+                                border-top:1px dashed var(--border-color);
+                                padding-top:6px;
+                            ">
                                 * Phí dịch vụ ${tyLePhi}% được áp dụng cho tổng tiền thuê
                             </div>
                         ` : ''}
@@ -330,7 +264,17 @@
                                 <tbody>
                                     ${data.giao_dich.map(g => `
                                         <tr>
-                                            <td>${g.loai_giao_dich === 'thanh_toan_thue' ? 'Thanh toán thuê + cọc' : g.loai_giao_dich === 'hoan_tien_coc' ? 'Hoàn tiền cọc' : g.loai_giao_dich === 'gia_han' ? 'Gia hạn' : g.loai_giao_dich}</td>
+                                            <td>
+                                                ${
+                                                    g.loai_giao_dich === 'thanh_toan_thue'
+                                                        ? 'Thanh toán thuê'
+                                                        : g.loai_giao_dich === 'gia_han'
+                                                            ? 'Gia hạn'
+                                                            : g.loai_giao_dich === 'hoan_tien'
+                                                                ? 'Hoàn tiền'
+                                                                : g.loai_giao_dich
+                                                }
+                                            </td>
                                             <td><strong>${g.so_tien_giao_dich}</strong> COINS</td>
                                             <td>${new Date(g.thoi_gian_thanh_toan).toLocaleString('vi-VN')}</td>
                                         </tr>
@@ -341,18 +285,6 @@
                     ` : `
                         <p style="color:var(--text-muted);">Chưa có giao dịch</p>
                     `}
-
-                    <div class="section-title">Đánh giá</div>
-                    ${data.danh_gia ? `
-                        <div class="info-grid">
-                            <span class="label">Số sao</span>
-                            <span class="value">${'★'.repeat(data.danh_gia.so_sao)} (${data.danh_gia.so_sao}/5)</span>
-                            <span class="label">Nhận xét</span>
-                            <span class="value">${data.danh_gia.noi_dung || 'Không có'}</span>
-                        </div>
-                    ` : `
-                        <p style="color:var(--text-muted);">Chưa có đánh giá</p>
-                    `}
             `;
 
             // Nếu đang thuê và là người thuê -> hiện nút hành động
@@ -361,60 +293,17 @@
                     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-color);">
                         <h3 style="font-size:14px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">Thao tác</h3>
                         <div class="action-buttons">
-                            <button onclick="returnRental()" class="btn btn-success">Trả NFT</button>
-                            <button onclick="cancelRental()" class="btn btn-danger">Hủy hợp đồng</button>
-                            <button onclick="extendRental()" class="btn btn-primary">Gia hạn</button>
-                            <button onclick="showReportForm()" class="btn btn-outline">Báo cáo</button>
-                        </div>
-                        <div id="reportForm" style="display:none;margin-top:12px;border:1px solid var(--border-color);padding:16px;">
-                            <h4 style="margin-bottom:8px;">Báo cáo vi phạm</h4>
-                            <form id="reportFormSubmit">
-                                <div class="form-group">
-                                    <label>Lý do</label>
-                                    <select id="reportReason" required>
-                                        <option value="khong_tra_nft">Không trả NFT</option>
-                                        <option value="tra_cham">Trả chậm</option>
-                                        <option value="nft_bi_hu_hong">NFT bị hư hỏng</option>
-                                        <option value="khac">Khác</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Nội dung</label>
-                                    <textarea id="reportContent" rows="3" placeholder="Mô tả chi tiết..." required></textarea>
-                                </div>
-                                <div style="display:flex;gap:8px;">
-                                    <button type="submit" class="btn btn-primary">Gửi báo cáo</button>
-                                    <button type="button" onclick="hideReportForm()" class="btn btn-outline">Hủy</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            }
+                            <button onclick="returnRental()" class="btn btn-success">
+                                Trả NFT
+                            </button>
 
-            // Nếu đã trả và chưa đánh giá -> hiện form đánh giá
-            if (hd.trang_thai_thue === 'da_tra' && !data.danh_gia) {
-                html += `
-                    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-color);">
-                        <div class="card" style="margin-top:0;">
-                            <div class="card-header">Đánh giá hợp đồng</div>
-                            <form id="reviewForm">
-                                <div class="form-group">
-                                    <label>Số sao</label>
-                                    <select id="rating" required>
-                                        <option value="5">5 sao - Tuyệt vời</option>
-                                        <option value="4">4 sao - Tốt</option>
-                                        <option value="3">3 sao - Trung bình</option>
-                                        <option value="2">2 sao - Kém</option>
-                                        <option value="1">1 sao - Rất kém</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Nhận xét</label>
-                                    <textarea id="reviewContent" placeholder="Nhập nhận xét..." rows="3"></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
-                            </form>
+                            <button onclick="cancelRental()" class="btn btn-danger">
+                                Hủy hợp đồng
+                            </button>
+
+                            <button onclick="extendRental()" class="btn btn-primary">
+                                Gia hạn
+                            </button>
                         </div>
                     </div>
                 `;
@@ -422,80 +311,6 @@
 
             html += `</div>`;
             container.innerHTML = html;
-
-            // Thêm event listener cho form đánh giá
-            const reviewForm = document.getElementById('reviewForm');
-            if (reviewForm) {
-                reviewForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    const so_sao = parseInt(document.getElementById('rating').value);
-                    const noi_dung = document.getElementById('reviewContent').value.trim();
-
-                    if (!noi_dung) {
-                        alert('Vui lòng nhập nhận xét');
-                        return;
-                    }
-
-                    try {
-                        const res = await fetch(`http://localhost:5000/api/rentals/${contractId}/review`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({ so_sao, noi_dung })
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            alert('Đánh giá thành công!');
-                            loadContractDetail();
-                        } else {
-                            alert('Lỗi: ' + data.message);
-                        }
-                    } catch (error) {
-                        alert('Lỗi kết nối máy chủ');
-                    }
-                });
-            }
-
-            // Thêm event listener cho form báo cáo
-            const reportForm = document.getElementById('reportFormSubmit');
-            if (reportForm) {
-                reportForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    const ly_do = document.getElementById('reportReason').value;
-                    const noi_dung = document.getElementById('reportContent').value.trim();
-
-                    if (!noi_dung) {
-                        alert('Vui lòng nhập nội dung báo cáo');
-                        return;
-                    }
-
-                    try {
-                        const res = await fetch('http://localhost:5000/api/reports/create', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({
-                                ma_hop_dong: contractId,
-                                ly_do: ly_do,
-                                noi_dung: noi_dung
-                            })
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            alert('Gửi báo cáo thành công!');
-                            hideReportForm();
-                        } else {
-                            alert('Lỗi: ' + data.message);
-                        }
-                    } catch (error) {
-                        alert('Lỗi kết nối máy chủ');
-                    }
-                });
-            }
         }
 
         // ============================================================
@@ -503,7 +318,9 @@
         // ============================================================
 
         async function returnRental() {
-            if (!confirm('Xác nhận trả NFT? Tiền cọc sẽ được hoàn lại.')) return;
+            if (!confirm('Bạn có chắc muốn trả NFT sớm không?')) {
+                return;
+            }
             try {
                 const res = await fetch(`http://localhost:5000/api/rentals/return/${contractId}`, {
                     method: 'POST',
@@ -512,7 +329,7 @@
                 const data = await res.json();
                 if (data.success) {
                     alert('Trả NFT thành công!');
-                    loadContractDetail();
+                    window.location.href = 'rentals.html';
                 } else {
                     alert('Lỗi: ' + data.message);
                 }
@@ -540,43 +357,107 @@
             }
         }
 
-        async function extendRental() {
-            const themNgay = prompt('Nhập số ngày muốn gia hạn:');
-            if (!themNgay) return;
-            const soNgay = parseInt(themNgay);
-            if (soNgay <= 0) {
-                alert('Số ngày không hợp lệ');
+        function extendRental() {
+            const themNgayText = prompt('Nhập số ngày muốn gia hạn:');
+
+            if (themNgayText === null) {
                 return;
             }
 
-            try {
-                const res = await fetch(`http://localhost:5000/api/rentals/extend/${contractId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ them_ngay: soNgay })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert(data.message);
-                    loadContractDetail();
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            } catch (error) {
-                alert('Lỗi kết nối máy chủ');
+            const themNgay = Number.parseInt(themNgayText, 10);
+
+            if (!Number.isInteger(themNgay) || themNgay <= 0) {
+                alert('Số ngày gia hạn không hợp lệ');
+                return;
             }
-        }
 
-        function showReportForm() {
-            document.getElementById('reportForm').style.display = 'block';
-        }
+            if (!window.currentContractData) {
+                alert('Chưa tải được thông tin hợp đồng');
+                return;
+            }
 
-        function hideReportForm() {
-            document.getElementById('reportForm').style.display = 'none';
-            document.getElementById('reportFormSubmit').reset();
+            const data = window.currentContractData;
+            const hd = data.hop_dong;
+            const vatPham = data.vat_pham;
+            const nft = data.nft;
+
+            const giaThueMoiNgay = Number(
+                vatPham?.gia_thue || nft?.gia_thue || 0
+            );
+
+            const tienGiaHan = giaThueMoiNgay * themNgay;
+
+            const tyLePhiDichVu = Number(data.ty_le_phi || 5);
+            const phiDichVu = Number(
+                (tienGiaHan * tyLePhiDichVu / 100).toFixed(2)
+            );
+
+            const tongThanhToan = Number(
+                (tienGiaHan + phiDichVu).toFixed(2)
+            );
+
+            const soDuHienTai = Number(
+                document
+                    .getElementById('walletBalance')
+                    .textContent
+                    .replace(/,/g, '')
+            ) || 0;
+
+            if (giaThueMoiNgay <= 0) {
+                alert('Không xác định được giá thuê của NFT');
+                return;
+            }
+
+            if (soDuHienTai < tongThanhToan) {
+                alert(
+                    `Số dư không đủ. Cần ${tongThanhToan} COINS để gia hạn`
+                );
+                return;
+            }
+
+            const extensionPayment = {
+                transaction_type: 'extend_rental',
+
+                ma_hop_dong: hd.ma_hop_dong,
+                ma_vat_pham: hd.ma_bai_dang,
+                ma_nft: nft?.ma_nft || '',
+
+                ten_nft:
+                    nft?.ten ||
+                    vatPham?.ten ||
+                    'NFT không rõ',
+
+                dia_chi_nguoi_thue:
+                    user.dia_chi_vi ||
+                    data.nguoi_thue?.dia_chi_vi ||
+                    '',
+
+                dia_chi_chu_so_huu:
+                    nft?.dia_chi_chu_so_huu || '',
+
+                them_ngay: themNgay,
+
+                thoi_luong_hien_thi:
+                    `${themNgay} ngày gia hạn`,
+
+                tien_thue: tienGiaHan,
+                phi_dich_vu: phiDichVu,
+                tong_thanh_toan: tongThanhToan,
+
+                so_du_hien_tai: soDuHienTai,
+
+                signature_status: 'pending',
+
+                return_url:
+                    `rental-detail-view.html?id=${hd.ma_hop_dong}`
+            };
+
+            sessionStorage.setItem(
+                'rentalPayment',
+                JSON.stringify(extensionPayment)
+            );
+
+            window.location.href = 'sign-rental.html';
         }
 
         loadWalletBalance();
@@ -589,5 +470,5 @@
             window.location.href = 'login.html';
         });
     </script>
-</body>
+    </body>
 </html>

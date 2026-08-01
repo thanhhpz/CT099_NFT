@@ -188,3 +188,28 @@
 @media (max-width: 768px) {
     .rental-container { padding: 20px; }
 }
+
+.compatible-character-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.compatible-character-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border: 1px solid #bbf7d0;
+    border-radius: 999px;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.compatible-icon {
+    font-weight: 700;
+}

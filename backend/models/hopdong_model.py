@@ -3,20 +3,28 @@ import datetime
 import uuid
 
 class HopDong:
-    def __init__(self, ma_bai_dang, ma_nguoi_thue, thoi_gian_bat_dau, thoi_gian_ket_thuc, ma_nhan_vat=None):
+    def __init__(
+        self,
+        ma_bai_dang,
+        ma_nguoi_thue,
+        thoi_gian_bat_dau,
+        thoi_gian_ket_thuc,
+        ma_nhan_vat=None
+    ):
         self.ma_hop_dong = str(uuid.uuid4())
         self.ma_bai_dang = ma_bai_dang
         self.ma_nguoi_thue = ma_nguoi_thue
         self.thoi_gian_bat_dau = thoi_gian_bat_dau
         self.thoi_gian_ket_thuc = thoi_gian_ket_thuc
-        self.trang_thai_thue = 'dang_thue'  # dang_thue, da_tra, da_huy
+        self.trang_thai_thue = 'dang_thue'
         self.ma_nhan_vat = ma_nhan_vat
         self.tong_tien = 0
-        self.tien_coc = 0
         self.so_ngay_thue = 0
         self.don_vi_thue = 'ngay'
         self.phi_dich_vu = 0
-        self.created_at = datetime.datetime.now(datetime.timezone.utc)
+        self.created_at = datetime.datetime.now(
+            datetime.timezone.utc
+        )
     
     def to_dict(self):
         return {
@@ -28,7 +36,6 @@ class HopDong:
             'trang_thai_thue': self.trang_thai_thue,
             'ma_nhan_vat': self.ma_nhan_vat,
             'tong_tien': self.tong_tien,
-            'tien_coc': self.tien_coc,
             'so_ngay_thue': self.so_ngay_thue,
             'don_vi_thue': self.don_vi_thue,
             'phi_dich_vu': self.phi_dich_vu,

@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Xác nhận giao dịch</title>
+
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/confirm.css" />
+    </head>
+
+    <body>
+        <header class="topbar">
+            <div class="topbar-brand">
+                NFT <span>RENTAL</span>
+            </div>
+
+            <div class="topbar-nav" id="topbarNav">
+                <a href="dashboard.html">Tổng quan</a>
+                <a href="games.html">Trò chơi</a>
+                <a href="marketplace.html">Chợ NFT</a>
+                <a href="my-nfts.html">NFT của tôi</a>
+                <a href="rentals.html">Thuê</a>
+                <a href="wallet.html">Ví</a>
+                <a href="transactions.html">Giao dịch</a>
+                <a href="notifications.html">Thông báo</a>
+                <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+            </div>
+
+            <div class="topbar-right">
+                <div class="balance-box">
+                    <span class="amount" id="walletBalance">0</span> COINS
+                </div>
+
+                <button class="topbar-toggle" onclick="toggleNav()">☰</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <main class="confirm-page">
+                <h2 class="confirm-page-title">Xác nhận giao dịch</h2>
+
+                <section class="confirm-card">
+                    <div class="confirm-card-header">
+                        <span class="confirm-card-title">XÁC NHẬN GIAO
+                            DỊCH</span>
+
+                        <div class="confirm-balance">
+                            <span>Số dư</span>
+                            <strong>
+                                <span id="confirmBalance">0</span> COINS
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="confirm-info-grid">
+                        <div class="confirm-row">
+                            <span class="confirm-label">Từ</span>
+                            <strong id="confirmFrom">—</strong>
+                        </div>
+
+                        <div class="confirm-row">
+                            <span class="confirm-label">Đến</span>
+                            <strong id="confirmTo">—</strong>
+                        </div>
+
+                        <div class="confirm-row">
+                            <span class="confirm-label">NFT</span>
+                            <strong id="confirmNftName">—</strong>
+                        </div>
+
+                        <div class="confirm-row">
+                            <span class="confirm-label">Thời gian thuê</span>
+                            <strong id="confirmDuration">—</strong>
+                        </div>
+                    </div>
+
+                    <div class="confirm-payment-summary">
+                        <div class="confirm-payment-row">
+                            <span>Tiền thuê</span>
+
+                            <strong>
+                                <span id="confirmRentPrice">0</span> COINS
+                            </strong>
+                        </div>
+
+                        <div class="confirm-payment-row">
+                            <span>Phí giao dịch</span>
+
+                            <strong>
+                                <span id="confirmServiceFee">0</span> COINS
+                            </strong>
+                        </div>
+
+                        <div class="confirm-payment-row confirm-total-row">
+                            <span>Tổng thanh toán</span>
+
+                            <strong>
+                                <span id="confirmTotal">0</span> COINS
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="confirm-signature-status">
+                        <span class="confirm-check">✓</span>
+                        Chữ ký hợp lệ
+                    </div>
+                </section>
+
+                <div class="confirm-actions">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="cancelConfirmBtn">
+                        Hủy
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="confirmTransactionBtn">
+                        Xác nhận
+                    </button>
+                </div>
+            </main>
+        </div>
+
+        <script>
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
+      const paymentText = sessionStorage.getItem("rentalPayment");
+
+      if (!token || !user) {
+        window.location.href = "login.html";
+      }
+
+      if (!paymentText) {
+        alert("Không tìm thấy thông tin giao dịch");
+        window.location.href = "marketplace.html";
+      }
+
+      let payment;
+
+        try {
+        payment = JSON.parse(paymentText);
+        } catch (error) {
+        alert("Dữ liệu giao dịch không hợp lệ");
+        sessionStorage.removeItem("rentalPayment");
+        window.location.href = "marketplace.html";
+        }
+
+      if (payment.signature_status !== "signed") {
+        alert("Giao dịch chưa được ký");
+        window.location.href = "sign-rental.html";
+      }
+
+      function toggleNav() {
+        document
+          .getElementById("topbarNav")
+          .classList.toggle("open");
+      }
+
+      function formatCoin(value) {
+        const number = Number(value) || 0;
+
+        return Number.isInteger(number)
+          ? number.toString()
+          : number.toFixed(2).replace(/\.?0+$/, "");
+      }
+
+      function shortenAddress(address) {
+        if (!address) return "Không rõ";
+
+        if (address.length <= 18) {
+          return address;
+        }
+
+        return `${address.slice(0, 10)}...${address.slice(-6)}`;
+      }
+
+      function renderConfirmPage() {
+        const isExtension =
+            payment.transaction_type === "extend_rental";
+
+        document.querySelector(".confirm-page-title").textContent =
+        isExtension
+            ? "Xác nhận gia hạn hợp đồng"
+            : "Xác nhận giao dịch";
+
+        document.querySelector(".confirm-card-title").textContent =
+        isExtension
+            ? "XÁC NHẬN GIA HẠN"
+            : "XÁC NHẬN GIAO DỊCH";
+        const durationLabel = document
+            .getElementById("confirmDuration")
+            .closest(".confirm-row")
+            .querySelector(".confirm-label");
+
+            durationLabel.textContent =
+            isExtension
+                ? "Thời gian gia hạn"
+                : "Thời gian thuê";
+        const rentPriceLabel = document
+            .getElementById("confirmRentPrice")
+            .closest(".confirm-payment-row")
+            .querySelector("span");
+
+            rentPriceLabel.textContent =
+            isExtension
+                ? "Tiền gia hạn"
+                : "Tiền thuê";
+        document.getElementById("confirmFrom").textContent =
+          shortenAddress(payment.dia_chi_nguoi_thue);
+
+        document.getElementById("confirmTo").textContent =
+          shortenAddress(payment.dia_chi_chu_so_huu);
+
+        document.getElementById("confirmNftName").textContent =
+          payment.ten_nft || "Không rõ";
+
+        document.getElementById("confirmDuration").textContent =
+          payment.thoi_luong_hien_thi || "Không rõ";
+
+        document.getElementById("confirmRentPrice").textContent =
+          formatCoin(payment.tien_thue);
+
+        document.getElementById("confirmServiceFee").textContent =
+          formatCoin(payment.phi_dich_vu);
+
+        document.getElementById("confirmTotal").textContent =
+          formatCoin(payment.tong_thanh_toan);
+
+        document.getElementById("confirmBalance").textContent =
+          formatCoin(payment.so_du_hien_tai);
+
+        document.getElementById("walletBalance").textContent =
+          formatCoin(payment.so_du_hien_tai);
+      }
+
+      document
+        .getElementById("cancelConfirmBtn")
+        .addEventListener("click", function () {
+            sessionStorage.removeItem("rentalPayment");
+
+            if (
+            payment.transaction_type === "extend_rental" &&
+            payment.ma_hop_dong
+            ) {
+            window.location.href =
+                `rental-detail-view.html?id=${payment.ma_hop_dong}`;
+            return;
+            }
+
+            window.location.href = "marketplace.html";
+        });
+
+document
+  .getElementById("confirmTransactionBtn")
+  .addEventListener("click", async function () {
+    const button = this;
+
+    button.disabled = true;
+    button.textContent = "Đang xử lý...";
+
+    try {
+      let response;
+
+      // =========================================================
+      // GIA HẠN HỢP ĐỒNG
+      // =========================================================
+      if (payment.transaction_type === "extend_rental") {
+        if (!payment.ma_hop_dong) {
+          throw new Error("Không tìm thấy mã hợp đồng cần gia hạn");
+        }
+
+        const themNgay = Number(payment.them_ngay);
+
+        if (!Number.isInteger(themNgay) || themNgay <= 0) {
+          throw new Error("Số ngày gia hạn không hợp lệ");
+        }
+
+        response = await fetch(
+          `http://localhost:5000/api/rentals/extend/${payment.ma_hop_dong}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              them_ngay: themNgay,
+            }),
+          },
+        );
+      }
+
+      // =========================================================
+      // TẠO HỢP ĐỒNG THUÊ MỚI
+      // =========================================================
+      else {
+        const requestBody = {
+          ma_bai_dang: payment.ma_vat_pham,
+        };
+
+        if (payment.ma_nhan_vat) {
+          requestBody.ma_nhan_vat = payment.ma_nhan_vat;
+        }
+
+        if (payment.don_vi === "gio") {
+          requestBody.so_gio = Number(payment.so_gio);
+        } else {
+          requestBody.so_ngay_thue = Number(
+            payment.so_ngay_thue || 1,
+          );
+        }
+
+        response = await fetch(
+          "http://localhost:5000/api/rentals/create",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(requestBody),
+          },
+        );
+      }
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || "Không thể xử lý giao dịch",
+        );
+      }
+
+      sessionStorage.removeItem("rentalPayment");
+
+      // Sau khi gia hạn, quay lại hợp đồng hiện tại
+      if (payment.transaction_type === "extend_rental") {
+        alert(data.message || "Gia hạn hợp đồng thành công!");
+
+        window.location.href =
+          payment.return_url ||
+          `rental-detail-view.html?id=${payment.ma_hop_dong}`;
+
+        return;
+      }
+
+      // Sau khi thuê mới, mở hợp đồng vừa tạo
+      alert(data.message || "Thuê NFT thành công!");
+
+      const maHopDong =
+        data.hop_dong?.ma_hop_dong ||
+        data.ma_hop_dong;
+
+      if (!maHopDong) {
+        window.location.href = "rentals.html";
+        return;
+      }
+
+      window.location.href =
+        `rental-detail-view.html?id=${maHopDong}`;
+    } catch (error) {
+      console.error("Lỗi xác nhận giao dịch:", error);
+      alert(error.message || "Lỗi kết nối máy chủ");
+
+      button.disabled = false;
+      button.textContent = "Xác nhận";
+    }
+  });
+
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function (event) {
+          event.preventDefault();
+
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          sessionStorage.removeItem("rentalPayment");
+
+          window.location.href = "login.html";
+        });
+
+      renderConfirmPage();
+    </script>
+    </body>
+</html>

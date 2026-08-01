@@ -4,7 +4,6 @@ from models.nguoidung_model import NguoiDung
 from models.hopdong_model import HopDong
 from models.giaodich_model import GiaoDich
 from models.vatpham_model import VatPham
-import hashlib
 import datetime
 import uuid
 import jwt
@@ -37,27 +36,35 @@ def wallet_routes(app):
     @app.route('/api/wallet/create', methods=['POST'])
     @token_required
     def create_wallet(current_user):
-        if current_user.dia_chi_vi:
-            return jsonify({'success': False, 'message': 'Đã có ví'}), 400
-        
-        address = hashlib.sha256(f"{current_user.ten_nguoi_dung}{datetime.datetime.now()}".encode()).hexdigest()[:40]
-        
-        wallet = Wallet(
-            dia_chi=address,
+        existing_wallet = Wallet.find_by_username(
+            current_user.ten_nguoi_dung
+        )
+
+        if existing_wallet:
+            return jsonify({
+                'success': False,
+                'message': 'Người dùng đã có ví'
+            }), 400
+
+        wallet = Wallet.create_wallet(
             ten_nguoi_dung=current_user.ten_nguoi_dung,
-            so_du=0,
-            private_key='',
-            public_key=''
+            ma_nguoi_dung=current_user.ma_nguoi_dung,
+            initial_balance=0
         )
-        wallet.save()
-        
-        from database.connection import nguoidung_collection
-        nguoidung_collection.update_one(
-            {'ma_nguoi_dung': current_user.ma_nguoi_dung},
-            {'$set': {'dia_chi_vi': address}}
-        )
-        
-        return jsonify({'success': True, 'wallet': wallet.to_dict()}), 201
+
+        safe_wallet = {
+            'dia_chi': wallet['dia_chi'],
+            'ten_nguoi_dung': wallet['ten_nguoi_dung'],
+            'so_du': wallet['so_du'],
+            'public_key': wallet['public_key'],
+            'created_at': wallet['created_at']
+        }
+
+        return jsonify({
+            'success': True,
+            'message': 'Tạo ví thành công',
+            'wallet': safe_wallet
+        }), 201
     
     # ============================================================
     # LẤY THÔNG TIN VÍ THEO TÊN NGƯỜI DÙNG
@@ -65,9 +72,25 @@ def wallet_routes(app):
     @app.route('/api/wallet/<ten_nguoi_dung>', methods=['GET'])
     def get_wallet(ten_nguoi_dung):
         wallet = Wallet.find_by_username(ten_nguoi_dung)
+
         if not wallet:
-            return jsonify({'success': False, 'message': 'Ví không tồn tại'}), 404
-        return jsonify({'success': True, 'wallet': wallet}), 200
+            return jsonify({
+                'success': False,
+                'message': 'Ví không tồn tại'
+            }), 404
+
+        safe_wallet = {
+            'dia_chi': wallet.get('dia_chi'),
+            'ten_nguoi_dung': wallet.get('ten_nguoi_dung'),
+            'so_du': wallet.get('so_du', 0),
+            'public_key': wallet.get('public_key'),
+            'created_at': wallet.get('created_at')
+        }
+
+        return jsonify({
+            'success': True,
+            'wallet': safe_wallet
+        }), 200
 
     # ============================================================
     # LẤY THÔNG TIN VÍ THEO MÃ NGƯỜI DÙNG (USER ID) / TỰ ĐỘNG KHỞI TẠO NẾU THIẾU
@@ -85,23 +108,24 @@ def wallet_routes(app):
 
         # Nếu người dùng chưa có ví, tự động tạo mới
         if not wallet:
-            address = hashlib.sha256(f"{ten_nguoi_dung}{datetime.datetime.now()}".encode()).hexdigest()[:40]
-            new_wallet = Wallet(
-                dia_chi=address,
+            wallet = Wallet.create_wallet(
                 ten_nguoi_dung=ten_nguoi_dung,
-                so_du=0,
-                private_key='',
-                public_key=''
+                ma_nguoi_dung=ma_nguoi_dung,
+                initial_balance=0
             )
-            new_wallet.save()
-            
-            nguoidung_collection.update_one(
-                {'ma_nguoi_dung': ma_nguoi_dung},
-                {'$set': {'dia_chi_vi': address}}
-            )
-            wallet = new_wallet.to_dict()
 
-        return jsonify({'success': True, 'wallet': wallet}), 200
+        safe_wallet = {
+            'dia_chi': wallet.get('dia_chi'),
+            'ten_nguoi_dung': wallet.get('ten_nguoi_dung'),
+            'so_du': wallet.get('so_du', 0),
+            'public_key': wallet.get('public_key'),
+            'created_at': wallet.get('created_at')
+        }
+
+        return jsonify({
+            'success': True,
+            'wallet': safe_wallet
+        }), 200
 
     # ============================================================
     # NẠP TIỀN VÀO VÍ
