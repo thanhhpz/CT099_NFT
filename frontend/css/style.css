@@ -2217,3 +2217,28 @@ footer {
     padding-left: 14px;
   }
 }
+
+.nft-game {
+    margin-top: 4px;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.nft-game strong {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.badge-owner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+}

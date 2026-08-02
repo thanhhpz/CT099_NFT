@@ -1,0 +1,38 @@
+{
+  "SHA-256": {
+    "so_lan": 10000,
+    "trung_binh_ms": 0.000566927157342434,
+    "nho_nhat_ms": 0.0004577450454235077,
+    "lon_nhat_ms": 0.022915657609701157,
+    "do_lech_chuan_ms": 0.0002968805954882485
+  },
+  "Ký ECDSA": {
+    "so_lan": 10000,
+    "trung_binh_ms": 0.47400203668512403,
+    "nho_nhat_ms": 0.394666101783514,
+    "lon_nhat_ms": 0.9971251711249352,
+    "do_lech_chuan_ms": 0.03010713767187844
+  },
+  "Xác minh ECDSA": {
+    "so_lan": 10000,
+    "trung_binh_ms": 1.827811602735892,
+    "nho_nhat_ms": 1.7310413531959057,
+    "lon_nhat_ms": 49.81929110363126,
+    "do_lech_chuan_ms": 0.5726078048487032
+  },
+  "Merkle Root (100 giao dịch)": {
+    "so_lan": 1000,
+    "trung_binh_ms": 0.5720804026350379,
+    "nho_nhat_ms": 0.5417079664766788,
+    "lon_nhat_ms": 0.8520837873220444,
+    "do_lech_chuan_ms": 0.02101227309019206
+  },
+  "Proof-of-Work difficulty=4": {
+    "so_lan": 10,
+    "trung_binh_ms": 19300.327024888247,
+    "nho_nhat_ms": 817.8497082553804,
+    "lon_nhat_ms": 54209.28729092702,
+    "do_lech_chuan_ms": 17877.684475150058,
+    "nonce_trung_binh": 56285.7
+  }
+}

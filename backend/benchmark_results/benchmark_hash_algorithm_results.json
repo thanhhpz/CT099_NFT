@@ -1,0 +1,93 @@
+[
+  {
+    "thuat_toan": "MD5",
+    "so_lan": 10000,
+    "thoi_gian_trung_binh_ms": 0.0017109890468418598,
+    "tong_thoi_gian_s": 0.01869083335623145,
+    "nho_nhat_ms": 0.0010826624929904938,
+    "lon_nhat_ms": 0.9542922489345074,
+    "do_lech_chuan_ms": 0.010443936429848196,
+    "so_lan_bam_moi_giay": 535021.6231351738,
+    "do_dai_hash_bit": 128,
+    "do_dai_hash_hex": 32,
+    "hash_mau": "822bc7cd74144a31c094fb1203b6cdca"
+  },
+  {
+    "thuat_toan": "SHA-1",
+    "so_lan": 10000,
+    "thoi_gian_trung_binh_ms": 0.002544343750923872,
+    "tong_thoi_gian_s": 0.026407250203192234,
+    "nho_nhat_ms": 0.0004577450454235077,
+    "lon_nhat_ms": 14.333250001072884,
+    "do_lech_chuan_ms": 0.1453648735375158,
+    "so_lan_bam_moi_giay": 378683.8812467931,
+    "do_dai_hash_bit": 160,
+    "do_dai_hash_hex": 40,
+    "hash_mau": "ec28ec126b459a1c0745e9d5d7ef7b42e9f892a7"
+  },
+  {
+    "thuat_toan": "SHA-224",
+    "so_lan": 10000,
+    "thoi_gian_trung_binh_ms": 0.0009500288870185614,
+    "tong_thoi_gian_s": 0.010952082928270102,
+    "nho_nhat_ms": 0.0004577450454235077,
+    "lon_nhat_ms": 0.4209168255329132,
+    "do_lech_chuan_ms": 0.00697214251194782,
+    "so_lan_bam_moi_giay": 913068.3236690498,
+    "do_dai_hash_bit": 224,
+    "do_dai_hash_hex": 56,
+    "hash_mau": "985eae622a7557a682d29f3fcfe059bb3f65fa9d55018443f3714bb8"
+  },
+  {
+    "thuat_toan": "SHA-256",
+    "so_lan": 10000,
+    "thoi_gian_trung_binh_ms": 0.0005476637277752161,
+    "tong_thoi_gian_s": 0.0061686658300459385,
+    "nho_nhat_ms": 0.0004577450454235077,
+    "lon_nhat_ms": 0.0427919439971447,
+    "do_lech_chuan_ms": 0.0005330665393082363,
+    "so_lan_bam_moi_giay": 1621096.0806618258,
+    "do_dai_hash_bit": 256,
+    "do_dai_hash_hex": 64,
+    "hash_mau": "cf5329f00907ce9eecd2501d73bdae34a65e732eb34368779625f4b027e99f2b"
+  },
+  {
+    "thuat_toan": "SHA-384",
+    "so_lan": 10000,
+    "thoi_gian_trung_binh_ms": 0.0007327467203140259,
+    "tong_thoi_gian_s": 0.007962749805301428,
+    "nho_nhat_ms": 0.0006249174475669861,
+    "lon_nhat_ms": 0.00929180532693863,
+    "do_lech_chuan_ms": 0.0001424433204479984,
+    "so_lan_bam_moi_giay": 1255847.5708155762,
+    "do_dai_hash_bit": 384,
+    "do_dai_hash_hex": 96,
+    "hash_mau": "d789123b84c6550b620491f5499a2f7faf105302095ae6db5a538e9d76f894ca1b170cac4dd8edc4128a9d709088e084"
+  },
+  {
+    "thuat_toan": "SHA-512",
+    "so_lan": 10000,
+    "thoi_gian_trung_binh_ms": 0.0007317408453673124,
+    "tong_thoi_gian_s": 0.007958124857395887,
+    "nho_nhat_ms": 0.0006249174475669861,
+    "lon_nhat_ms": 0.007375143468379974,
+    "do_lech_chuan_ms": 0.00011839841790972378,
+    "so_lan_bam_moi_giay": 1256577.4198310666,
+    "do_dai_hash_bit": 512,
+    "do_dai_hash_hex": 128,
+    "hash_mau": "05c79731a6c5d8ac1b95934549beab03f48ac50bec956c0452eee65d4ceee92ee057d86c2b3573bec268da67dbba6516f97ddf3f8b26e0da09428a92c23a7acc"
+  },
+  {
+    "thuat_toan": "BLAKE2b",
+    "so_lan": 10000,
+    "thoi_gian_trung_binh_ms": 0.001120455004274845,
+    "tong_thoi_gian_s": 0.012696499936282635,
+    "nho_nhat_ms": 0.0006249174475669861,
+    "lon_nhat_ms": 0.07762527093291283,
+    "do_lech_chuan_ms": 0.0030055670103105365,
+    "so_lan_bam_moi_giay": 787618.6390095684,
+    "do_dai_hash_bit": 512,
+    "do_dai_hash_hex": 128,
+    "hash_mau": "0ff3bcecd215bc41fe9367e2794b3cf3b6f54bf2de41b9c2ade3400399fd68af0562a093225a5d2828328a3fb1cb18041caba6ddb96b15ccc0b6d4712a9af2c2"
+  }
+]

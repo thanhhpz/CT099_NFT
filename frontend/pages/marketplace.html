@@ -101,8 +101,44 @@
                         'dang_thue': 'badge-warning',
                         'tam_ngung': 'badge-danger'
                     };
-                    const ownerName = nft.ten_chu_so_huu || nft.dia_chi_chu_so_huu.slice(0, 12) + '...';
-                    const canRent = nft.trang_thai === 'co_san' && nft.dia_chi_chu_so_huu !== user.dia_chi_vi;
+                    const ownerName =
+                        nft.ten_chu_so_huu ||
+                        (
+                            nft.dia_chi_chu_so_huu
+                                ? nft.dia_chi_chu_so_huu.slice(0, 12) + '...'
+                                : 'Không rõ'
+                        );
+
+                    const isOwner =
+                        nft.dia_chi_chu_so_huu === user.dia_chi_vi;
+
+                    const isAvailable =
+                        nft.trang_thai === 'co_san';
+
+                    let actionHtml = '';
+
+                    if (isOwner) {
+                        actionHtml = `
+                            <span class="badge badge-owner">
+                                NFT của bạn
+                            </span>
+                        `;
+                    } else if (isAvailable) {
+                        actionHtml = `
+                            <a
+                                href="rental-detail.html?nft_id=${nft.ma_nft}"
+                                class="btn btn-primary btn-sm"
+                            >
+                                Thuê
+                            </a>
+                        `;
+                    } else {
+                        actionHtml = `
+                            <span class="badge badge-warning">
+                                Đã có người thuê
+                            </span>
+                        `;
+                    }
 
                     html += `
                         <div class="nft-item">
@@ -126,11 +162,7 @@
                             <div style="font-size:12px;color:var(--text-muted);margin:4px 0;">Chủ sở hữu: ${ownerName}</div>
                             <div style="font-size:12px;color:var(--text-muted);">Lượt thuê: ${nft.so_lan_thue || 0}</div>
                             <div class="nft-actions">
-                                ${canRent ? `
-                                    <a href="rental-detail.html?nft_id=${nft.ma_nft}" class="btn btn-primary btn-sm">Thuê</a>
-                                ` : `
-                                    <span class="badge badge-warning">Đã có người thuê</span>
-                                `}
+                                ${actionHtml}
                             </div>
                         </div>
                     `;
