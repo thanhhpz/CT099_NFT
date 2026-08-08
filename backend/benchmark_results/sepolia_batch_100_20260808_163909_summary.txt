@@ -1,0 +1,13 @@
+BENCHMARK HÀNG LOẠT GIAO DỊCH BLOCKCHAIN
+============================================================
+Tổng giao dịch: 100
+Gửi thành công lên node: 100
+Blockchain xác nhận thành công: 100
+Thất bại / timeout: 0
+Tỷ lệ thành công: 100.0%
+Thời gian gửi batch: 148.357 giây
+Tổng thời gian benchmark: 178.68 giây
+Thời gian trung bình / giao dịch: 88.69 giây
+Gas Used trung bình: 189306.04
+Throughput gửi transaction: 0.674 giao dịch/giây
+Throughput xác nhận: 0.56 giao dịch/giây
