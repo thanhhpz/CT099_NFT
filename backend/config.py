@@ -11,3 +11,11 @@ class Config:
     # Platform Fee
     PLATFORM_FEE_PERCENT = 5  # 5% phí dịch vụ
     PLATFORM_WALLET = 'system_wallet_address'  # Ví nhận phí dịch vụ
+    
+        # Ethereum Sepolia
+    SEPOLIA_RPC_URL = os.getenv("SEPOLIA_RPC_URL")
+
+    NFT_CONTRACT_ADDRESS = os.getenv(
+        "NFT_CONTRACT_ADDRESS"
+    )
+    

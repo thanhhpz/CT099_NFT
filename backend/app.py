@@ -14,6 +14,8 @@ from routes.character_routes import character_routes
 from routes.item_routes import item_routes
 from routes.admin_routes import admin_routes
 
+from routes.blockchain_routes import blockchain_routes
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -53,6 +55,8 @@ game_routes(app)
 character_routes(app)
 item_routes(app)
 admin_routes(app)
+
+blockchain_routes(app)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -8,6 +8,7 @@ from models.wallet_model import Wallet
 from models.nhanvat_model import NhanVat
 from config import Config
 from models.nhanvat_vatpham_model import NhanVatVatPham
+from blockchain.ethereum_contract import get_ethereum_rental_contract
 import datetime
 import jwt
 from functools import wraps
@@ -202,7 +203,7 @@ def rental_routes(app):
                     f'Số dư không đủ. '
                     f'Cần {tong_thanh_toan} COINS'
                 ),
-                'pdúngchưaayment': {
+                'payment': {
                     'so_du_hien_tai': so_du_hien_tai,
                     'tong_thanh_toan': tong_thanh_toan,
                     'so_tien_con_thieu': round(
@@ -265,111 +266,317 @@ def rental_routes(app):
         }), 200
     
     # ============================================================
-    # TẠO HỢP ĐỒNG THUÊ (HỖ TRỢ THUÊ THEO GIỜ)
+    # TẠO HỢP ĐỒNG THUÊ + XÁC MINH BLOCKCHAIN
     # ============================================================
     @app.route('/api/rentals/create', methods=['POST'])
-    # rental_routes.py - Phần create_rental đã sửa
-
     @token_required
     def create_rental(current_user):
-        print(">>>>>>>>>>> CREATE RENTAL CALLED <<<<<<<<<<<", flush=True)
-        data = request.get_json()
-        required = ['ma_bai_dang']
-        for field in required:
-            if field not in data:
-                return jsonify({'success': False, 'message': f'Thiếu {field}'}), 400
-        
-        item = VatPham.find_by_ma(data['ma_bai_dang'])
-        if not item:
-            return jsonify({'success': False, 'message': 'Vật phẩm không tồn tại'}), 404
-        
-        if item['trang_thai_thue'] != 'còn trống':
-            return jsonify({'success': False, 'message': 'Vật phẩm đang được thuê'}), 400
-        
-        don_vi = item.get('don_vi_thue', 'ngay')
-        
-        # Xác định thời gian thuê
-        if don_vi == 'gio':
-            so_gio = data.get('so_gio', 1)
-            if so_gio <= 0:
-                return jsonify({'success': False, 'message': 'Số giờ không hợp lệ'}), 400
-            max_gio = item['thoi_gian_thue_toi_da'] * 24
-            if so_gio > max_gio:
-                return jsonify({'success': False, 'message': f'Vượt quá thời gian thuê tối đa ({max_gio} giờ)'}), 400
-            
-            tong_tien = item['gia_thue'] * (so_gio / 24)
-            end_date = datetime.datetime.utcnow() + datetime.timedelta(hours=so_gio)
-            so_ngay_thue = so_gio / 24
-            
-        else:  # 'ngay' hoặc 'tuan'
-            so_ngay = data.get('so_ngay_thue', 1)
-            if so_ngay <= 0:
-                return jsonify({'success': False, 'message': 'Số ngày không hợp lệ'}), 400
-            if so_ngay > item['thoi_gian_thue_toi_da']:
-                return jsonify({'success': False, 'message': f'Vượt quá thời gian thuê tối đa ({item["thoi_gian_thue_toi_da"]} ngày)'}), 400
-            
-            tong_tien = item['gia_thue'] * so_ngay
-            end_date = datetime.datetime.utcnow() + datetime.timedelta(days=so_ngay)
-            so_ngay_thue = so_ngay
-        
-        # Tính phí dịch vụ
-        phi_dich_vu = tong_tien * Config.PLATFORM_FEE_PERCENT / 100
-
-        # Không còn tiền đặt cọc.
-        tong_thanh_toan = tong_tien + phi_dich_vu
-        
-        wallet = Wallet.find_by_address(current_user.dia_chi_vi)
-        if not wallet:
-            return jsonify({'success': False, 'message': 'Không tìm thấy ví'}), 404
-        
         print(
-            "[DEBUG RENT]",
-            {
-                "file": __file__,
-                "gia_thue": item.get("gia_thue"),
-                "so_ngay_thue": so_ngay_thue,
-                "tong_tien": tong_tien,
-                "phi_dich_vu": phi_dich_vu,
-                "tong_thanh_toan": tong_thanh_toan
-            },
+            ">>>>>>>>>>> CREATE RENTAL CALLED <<<<<<<<<<<",
             flush=True
         )
-        if wallet['so_du'] < tong_thanh_toan:
-            return jsonify({'success': False, 'message': f'Số dư không đủ. Cần {tong_thanh_toan} COINS'}), 400
-        
-        start_date = datetime.datetime.utcnow()
-        
+
+        data = request.get_json(silent=True) or {}
+
+        # --------------------------------------------------------
+        # 1. Kiểm tra dữ liệu bắt buộc
+        # --------------------------------------------------------
+        required = [
+            'ma_bai_dang',
+            'transaction_hash'
+        ]
+
+        for field in required:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'message': f'Thiếu {field}'
+                }), 400
+
+        transaction_hash = data['transaction_hash']
+
+        # --------------------------------------------------------
+        # 2. Kiểm tra vật phẩm
+        # --------------------------------------------------------
+        item = VatPham.find_by_ma(
+            data['ma_bai_dang']
+        )
+
+        if not item:
+            return jsonify({
+                'success': False,
+                'message': 'Vật phẩm không tồn tại'
+            }), 404
+
+        if item.get('trang_thai_thue') != 'còn trống':
+            return jsonify({
+                'success': False,
+                'message': 'Vật phẩm đang được thuê'
+            }), 400
+
+        # --------------------------------------------------------
+        # 3. Lấy NFT của vật phẩm
+        # --------------------------------------------------------
+        nfts = NFT.find_by_vat_pham(
+            item['ma_vat_pham']
+        )
+
+        if not nfts:
+            return jsonify({
+                'success': False,
+                'message': 'Không tìm thấy NFT của vật phẩm'
+            }), 404
+
+        nft = nfts[0]
+
+        if nft.get('trang_thai') != 'co_san':
+            return jsonify({
+                'success': False,
+                'message': 'NFT hiện không sẵn sàng để thuê'
+            }), 400
+
+        # --------------------------------------------------------
+        # 4. Xác minh transaction trên Ethereum Sepolia
+        # --------------------------------------------------------
+        try:
+            ethereum = get_ethereum_rental_contract()
+
+            blockchain_data = (
+                ethereum.verify_rental_transaction(
+                    transaction_hash
+                )
+            )
+
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'message': (
+                    'Không thể xác minh giao dịch blockchain: '
+                    + str(e)
+                )
+            }), 400
+
+        # NFT trên blockchain phải đúng NFT đang thuê
+        if (
+            str(blockchain_data.get('nft_id'))
+            != str(nft.get('ma_nft'))
+        ):
+            return jsonify({
+                'success': False,
+                'message': (
+                    'NFT trong giao dịch blockchain '
+                    'không khớp với NFT đang thuê'
+                )
+            }), 400
+
+        # --------------------------------------------------------
+        # 5. Xác định thời gian thuê
+        # --------------------------------------------------------
+        don_vi = item.get(
+            'don_vi_thue',
+            'ngay'
+        )
+
+        now = datetime.datetime.utcnow()
+
+        if don_vi == 'gio':
+            try:
+                so_gio = int(
+                    data.get('so_gio', 0)
+                )
+            except (TypeError, ValueError):
+                so_gio = 0
+
+            if so_gio <= 0:
+                return jsonify({
+                    'success': False,
+                    'message': 'Số giờ không hợp lệ'
+                }), 400
+
+            max_gio = (
+                item.get('thoi_gian_thue_toi_da', 1)
+                * 24
+            )
+
+            if so_gio > max_gio:
+                return jsonify({
+                    'success': False,
+                    'message': (
+                        f'Vượt quá thời gian thuê tối đa '
+                        f'({max_gio} giờ)'
+                    )
+                }), 400
+
+            tong_tien = (
+                item['gia_thue']
+                * (so_gio / 24)
+            )
+
+            end_date = (
+                now
+                + datetime.timedelta(
+                    hours=so_gio
+                )
+            )
+
+            so_ngay_thue = so_gio / 24
+
+        else:
+            try:
+                so_ngay = float(
+                    data.get(
+                        'so_ngay_thue',
+                        0
+                    )
+                )
+            except (TypeError, ValueError):
+                so_ngay = 0
+
+            if so_ngay <= 0:
+                return jsonify({
+                    'success': False,
+                    'message': 'Số ngày không hợp lệ'
+                }), 400
+
+            if (
+                so_ngay
+                > item.get(
+                    'thoi_gian_thue_toi_da',
+                    1
+                )
+            ):
+                return jsonify({
+                    'success': False,
+                    'message': (
+                        'Vượt quá thời gian thuê tối đa '
+                        f'({item["thoi_gian_thue_toi_da"]} ngày)'
+                    )
+                }), 400
+
+            tong_tien = (
+                item['gia_thue']
+                * so_ngay
+            )
+
+            end_date = (
+                now
+                + datetime.timedelta(
+                    days=so_ngay
+                )
+            )
+
+            so_ngay_thue = so_ngay
+
+        # --------------------------------------------------------
+        # 6. Tính tiền
+        # --------------------------------------------------------
+        tong_tien = round(
+            tong_tien,
+            2
+        )
+
+        phi_dich_vu = round(
+            tong_tien
+            * Config.PLATFORM_FEE_PERCENT
+            / 100,
+            2
+        )
+
+        tong_thanh_toan = round(
+            tong_tien + phi_dich_vu,
+            2
+        )
+
+        # --------------------------------------------------------
+        # 7. Kiểm tra ví nội bộ
+        # --------------------------------------------------------
+        wallet = Wallet.find_by_address(
+            current_user.dia_chi_vi
+        )
+
+        if not wallet:
+            return jsonify({
+                'success': False,
+                'message': 'Không tìm thấy ví'
+            }), 404
+
+        if (
+            float(wallet.get('so_du', 0))
+            < tong_thanh_toan
+        ):
+            return jsonify({
+                'success': False,
+                'message': (
+                    f'Số dư không đủ. '
+                    f'Cần {tong_thanh_toan} COINS'
+                )
+            }), 400
+
+        # --------------------------------------------------------
+        # 8. Tạo hợp đồng MongoDB
+        # --------------------------------------------------------
         hopdong = HopDong(
             ma_bai_dang=data['ma_bai_dang'],
             ma_nguoi_thue=current_user.ma_nguoi_dung,
-            thoi_gian_bat_dau=start_date,
+            thoi_gian_bat_dau=now,
             thoi_gian_ket_thuc=end_date,
-            ma_nhan_vat=data.get('ma_nhan_vat')
+            ma_nhan_vat=data.get('ma_nhan_vat'),
+
+            blockchain_rental_id=(
+                blockchain_data.get('rental_id')
+            ),
+            blockchain_tx_hash=transaction_hash,
+            blockchain_renter=(
+                blockchain_data.get('renter')
+            )
         )
+
         hopdong.tong_tien = tong_tien
         hopdong.so_ngay_thue = so_ngay_thue
         hopdong.don_vi_thue = don_vi
         hopdong.phi_dich_vu = phi_dich_vu
+
         hopdong.save()
-        
-        # Trừ tiền từ ví người thuê
-        Wallet.update_balance(wallet['dia_chi'], wallet['so_du'] - tong_thanh_toan)
-        
-        # Cộng tiền cho chủ sở hữu (nếu có NFT)
-        nfts = NFT.find_by_vat_pham(item['ma_vat_pham'])
-        if nfts:
-            owner_wallet = Wallet.find_by_address(nfts[0]['dia_chi_chu_so_huu'])
-            if owner_wallet:
-                Wallet.update_balance(owner_wallet['dia_chi'], owner_wallet['so_du'] + tong_tien)
-        
-        # Cập nhật trạng thái vật phẩm
-        VatPham.update_status(item['ma_vat_pham'], 'đang thuê')
-        
-        # Cập nhật trạng thái NFT
-        if nfts:
-            NFT.update_status(nfts[0]['ma_nft'], 'dang_thue')
-        
-        # Tạo giao dịch thanh toán
+
+        # --------------------------------------------------------
+        # 9. Trừ COINS người thuê
+        # --------------------------------------------------------
+        Wallet.update_balance(
+            wallet['dia_chi'],
+            wallet['so_du']
+            - tong_thanh_toan
+        )
+
+        # --------------------------------------------------------
+        # 10. Cộng COINS cho chủ sở hữu
+        # --------------------------------------------------------
+        owner_wallet = Wallet.find_by_address(
+            nft.get('dia_chi_chu_so_huu')
+        )
+
+        if owner_wallet:
+            Wallet.update_balance(
+                owner_wallet['dia_chi'],
+                owner_wallet['so_du']
+                + tong_tien
+            )
+
+        # --------------------------------------------------------
+        # 11. Cập nhật trạng thái
+        # --------------------------------------------------------
+        VatPham.update_status(
+            item['ma_vat_pham'],
+            'đang thuê'
+        )
+
+        NFT.update_status(
+            nft['ma_nft'],
+            'dang_thue'
+        )
+
+        # --------------------------------------------------------
+        # 12. Lưu giao dịch nội bộ
+        # --------------------------------------------------------
         giao_dich = GiaoDich(
             ma_hop_dong=hopdong.ma_hop_dong,
             loai_giao_dich='thanh_toan_thue',
@@ -377,14 +584,30 @@ def rental_routes(app):
             hinh_thuc_thanh_toan='ví',
             ma_nguoi_dung=current_user.ma_nguoi_dung
         )
+
         giao_dich.save()
-        
-        # ✅ THÊM RETURN Ở ĐÂY
+
+        # --------------------------------------------------------
+        # 13. Trả kết quả
+        # --------------------------------------------------------
         return jsonify({
             'success': True,
-            'message': f'Tạo hợp đồng thuê thành công!',
+            'message': 'Tạo hợp đồng thuê thành công!',
             'hop_dong': hopdong.to_dict(),
-            'tong_thanh_toan': tong_thanh_toan
+            'tong_thanh_toan': tong_thanh_toan,
+
+            'blockchain': {
+                'transaction_hash': transaction_hash,
+                'rental_id': blockchain_data.get(
+                    'rental_id'
+                ),
+                'nft_id': blockchain_data.get(
+                    'nft_id'
+                ),
+                'renter': blockchain_data.get(
+                    'renter'
+                )
+            }
         }), 201
         
 

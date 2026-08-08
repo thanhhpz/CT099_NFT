@@ -9,7 +9,10 @@ class HopDong:
         ma_nguoi_thue,
         thoi_gian_bat_dau,
         thoi_gian_ket_thuc,
-        ma_nhan_vat=None
+        ma_nhan_vat=None,
+        blockchain_rental_id=None,
+        blockchain_tx_hash=None,
+        blockchain_renter=None
     ):
         self.ma_hop_dong = str(uuid.uuid4())
         self.ma_bai_dang = ma_bai_dang
@@ -22,6 +25,13 @@ class HopDong:
         self.so_ngay_thue = 0
         self.don_vi_thue = 'ngay'
         self.phi_dich_vu = 0
+        self.blockchain_rental_id = blockchain_rental_id
+        self.blockchain_tx_hash = blockchain_tx_hash
+        self.blockchain_renter = blockchain_renter
+        self.blockchain_network = 'sepolia'
+        self.blockchain_contract_address = (
+            '0x056De5a6E23aCf5AF3D2e116C1e962Cb871068d1'
+        )
         self.created_at = datetime.datetime.now(
             datetime.timezone.utc
         )
@@ -39,6 +49,13 @@ class HopDong:
             'so_ngay_thue': self.so_ngay_thue,
             'don_vi_thue': self.don_vi_thue,
             'phi_dich_vu': self.phi_dich_vu,
+
+            'blockchain_rental_id': self.blockchain_rental_id,
+            'blockchain_tx_hash': self.blockchain_tx_hash,
+            'blockchain_renter': self.blockchain_renter,
+            'blockchain_network': self.blockchain_network,
+            'blockchain_contract_address': self.blockchain_contract_address,
+
             'created_at': self.created_at
         }
     
